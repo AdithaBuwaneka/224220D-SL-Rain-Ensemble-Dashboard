@@ -14,10 +14,11 @@ CM3720 Machine Learning & Pattern Recognition hands-on project by Wimalasuriya A
 
 - **Tomorrow:** chance of rain for every city on an OpenStreetMap weather map (press Play to see the last 7 days),
   chance by city with each zone's cut-off, and the expected amount of rain
-- **Model comparison:** all models on the test years, by zone and by monsoon season
+- **Model comparison:** all models on the test years, by zone and by monsoon season, and whether the chance of
+  rain can be trusted
 - **Why this prediction?:** SHAP explanation for any city
 - **Test years:** how the model did day by day in 2024 to 2026
-- Light, dark and system themes (buttons in the sidebar)
+- Opens in light mode; dark mode and the computer's own setting can be chosen with the buttons in the sidebar
 
 Live app: *(link added after deployment)*
 
@@ -59,10 +60,18 @@ Weather data by Open-Meteo.com, licensed under CC BY 4.0.
 
 Rain amount: Random Forest + ANN gave the lowest error (MAE 4.34 mm, R² 0.33), compared with 5.33 mm for persistence.
 
-Main findings: every ensemble beats the simple baselines and a single tree, but the differences between the
-ensembles are small. The wet zone is the easiest to predict and the dry zone in the first inter-monsoon is the
-hardest. Choosing the cut-off for each zone raised the wet zone's balanced accuracy from 0.72 to 0.80. The full
-discussion is in the notebook.
+Main findings:
+
+- Every ensemble beats the simple baselines and a single tree, but the differences between the ensembles are small.
+  A bootstrap of the test days (1,000 resamples) shows that CatBoost, XGBoost, stacking and the ARIMA + RF hybrid
+  cannot be told apart from soft voting.
+- The chances given by soft voting match how often it really rained (lowest Brier score, 0.130), so the dashboard
+  shows them as they are. Stacking was over-confident at high chances.
+- The wet zone is the easiest to predict and the dry zone in the first inter-monsoon is the hardest. With the zone
+  cut-offs, the intermediate zone missed the most rain days (31%).
+- Choosing the cut-off for each zone raised the wet zone's balanced accuracy from 0.72 to 0.80.
+
+The full discussion is in the notebook.
 
 ## Project structure
 
@@ -91,9 +100,11 @@ To download the data again: `python src/download_data.py`. To retrain, run the n
 
 ## AI-use declaration
 
-- **AI-assisted (Claude):** writing the Python code in the notebook and the dashboard, the code comments, and
-  helping write my sections in clear English from my own points and decisions.
+- **AI-assisted (Claude):** writing all of the code and its comments (the notebook, the dashboard and the
+  scripts that draw the charts and images), and the wording of my written sections (the points and
+  decisions in them are my own).
 - **My own work:** the project idea and the research questions, the choice of data, cities and rain thresholds,
-  the planning, the modelling decisions, the plan and Excalidraw-style look of the architecture diagram (the AI
-  wrote the code that draws it), and the interpretation of the results and the conclusions.
+  the planning, the modelling decisions, the plan and Excalidraw-style look of the architecture diagram, and the
+  interpretation of the results and the conclusions.
 - **How I used it:** I decided what to build and checked the outputs at each step; the AI wrote the code for it.
+  I reviewed the code and the results, and I take responsibility for the submitted work.
