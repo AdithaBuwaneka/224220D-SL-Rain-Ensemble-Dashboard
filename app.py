@@ -332,6 +332,8 @@ with tab_why:
 with tab_models:
     st.header("Model comparison (test years 2024 to Nov 2026)")
     res = pd.DataFrame(info["test_results"]).T
+    num = ["accuracy", "balanced_acc", "F1", "ROC_AUC", "Brier"]
+    res[num] = res[num].apply(pd.to_numeric)      # the group column made every column text; scores must be numbers
     tp_all = get_test_predictions()
     tp_pred = tp_all["prob_soft_voting"] >= tp_all["zone"].map(info["zone_threshold"])
     k = st.columns(3)
