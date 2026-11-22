@@ -192,7 +192,9 @@ info, models = get_models()
 # ---------------------------------------------------------------- data for the prediction
 st.sidebar.title("Sri Lanka rain tomorrow")
 st.sidebar.caption("CM3720 hands-on project by Wimalasuriya A.G.A.B. (224220D)")
-source = st.sidebar.radio("Weather data", ["Live (Open-Meteo, today)", "Past day (ERA5 data)"])
+st.sidebar.subheader("Controls")
+source = st.sidebar.radio("Weather data", ["Live (Open-Meteo, today)", "Past day (ERA5 data)"],
+                          help="Changes the Tomorrow and Why this prediction? tabs.")
 
 live_failed = False
 if source.startswith("Live"):
@@ -213,6 +215,11 @@ if not source.startswith("Live") or live_failed:
     note = (f"ERA5 weather up to **{day.date()}**, prediction for **{(day + pd.Timedelta(days=1)).date()}**. "
             "The saved models were trained on all years, so past days are a demo, not a fair test.")
 
+# one city for every tab that shows a single city (instead of a separate city box in each tab)
+CITY_LIST = sorted(info["cities"])
+city = st.sidebar.selectbox("City", CITY_LIST, index=CITY_LIST.index("Colombo"),
+                            help="Changes the Why this prediction? and Test years tabs, and is marked on the Tomorrow tab.")
+
 is_live = source.startswith("Live") and not live_failed
 loaded_at = pd.Timestamp.now(tz="Asia/Colombo").strftime("%d %b %Y, %H:%M") + " (Sri Lanka time)"
 pred, X = predict(history, info, models, day)
@@ -221,6 +228,8 @@ actual = history[history["date"] == next_day].set_index("city")["precipitation_s
 
 st.sidebar.markdown("---")
 st.sidebar.caption("Weather data by [Open-Meteo.com](https://open-meteo.com/) (CC BY 4.0), ERA5 by ECMWF / Copernicus.")
+st.sidebar.caption("To hide this panel and widen the charts, use the small button at its top right "
+                   "(it shows when the mouse is over the panel).")
 st.sidebar.caption("Light mode is the default. For dark mode, open the menu at the top right, then Settings, "
                    "then choose the app theme.")
 
@@ -252,7 +261,8 @@ with tab_map:
         components.html(weather_map_html(history, pred, day), height=610)
     with right, st.container(border=True):
         st.markdown("**Chance of rain by city**")
-        st.caption("Bar colour = zone. The grey tick is the zone's cut-off for saying 'rain'.")
+        st.caption("Bar colour = zone. The grey tick is the zone's cut-off for saying 'rain'. "
+                   "The city chosen in the sidebar is in bold.")
         b = pred.sort_values("Soft voting")
         fig = go.Figure(go.Bar(x=b["Soft voting"] * 100, y=b.index, orientation="h",
                                marker_color=[ZONE_COLORS[z] for z in b["zone"]],
@@ -263,6 +273,7 @@ with tab_map:
                                  hovertemplate="cut-off %{x:.0f}%<extra></extra>"))
         for z, c in ZONE_COLORS.items():
             fig.add_trace(go.Bar(x=[None], y=[None], marker_color=c, name=f"{z} zone"))
+        fig.update_yaxes(tickvals=list(b.index), ticktext=[f"<b>{c}</b>" if c == city else c for c in b.index])
         fig.update_layout(height=640, xaxis=dict(range=[0, 112], title="chance of rain (%)"), margin=dict(t=10, l=10),
                           legend=dict(orientation="h", y=-0.12), barmode="overlay")
         st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
@@ -300,7 +311,7 @@ with tab_map:
 # ---------------------------------------------------------------- tab 2: SHAP
 with tab_why:
     st.header("Why this prediction?")
-    city = st.selectbox("City", list(pred.index), index=list(pred.index).index("Colombo"))
+    st.caption("City and weather data are chosen in the sidebar.")
     st.markdown(f"**{city}** ({pred.loc[city, 'zone']} zone): CatBoost gives a "
                 f"**{pred.loc[city, 'CatBoost']:.0%}** chance of rain on {next_day.date()}.")
     explainer = shap.TreeExplainer(models["CatBoost"])
@@ -406,7 +417,8 @@ with tab_models:
 with tab_test:
     st.header("How the model did in the test years")
     tp = get_test_predictions()
-    city2 = st.selectbox("City ", sorted(tp["city"].unique()), index=sorted(tp["city"].unique()).index("Colombo"))
+    city2 = city                                   # the city chosen in the sidebar
+    st.caption(f"Showing {city2}. The city is chosen in the sidebar.")
     d = tp[tp["city"] == city2].copy()
     thr = info["zone_threshold"][d["zone"].iloc[0]]
     d["predicted"] = d["prob_soft_voting"] >= thr
