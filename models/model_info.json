@@ -117,9 +117,9 @@
   "Jaffna": "Dry"
  },
  "zone_threshold": {
-  "Wet": 0.8,
+  "Wet": 0.81,
   "Intermediate": 0.67,
-  "Dry": 0.46
+  "Dry": 0.44
  },
  "vote_models": [
   "Random Forest",
@@ -137,9 +137,9 @@
   "ANN regressor": "ann_regressor"
  },
  "rf_ann_weights": {
-  "intercept": -0.01862100686565138,
-  "rf": 0.5527243936344921,
-  "ann": 0.4717410354798011
+  "intercept": -0.018621006865651824,
+  "rf": 0.5527243936344924,
+  "ann": 0.4717410354798013
  },
  "regression_results": {
   "Baseline: persistence (today's rain)": {
@@ -341,75 +341,75 @@
   },
   "Decision tree": {
    "group": "Single tree",
-   "accuracy": 0.7997,
-   "balanced_acc": 0.7851,
-   "F1": 0.8395,
-   "ROC_AUC": 0.8681,
-   "Brier": 0.1398
+   "accuracy": 0.7974,
+   "balanced_acc": 0.7794,
+   "F1": 0.8393,
+   "ROC_AUC": 0.8745,
+   "Brier": 0.1387
   },
   "Bagging (trees)": {
    "group": "Bagging",
-   "accuracy": 0.8099,
+   "accuracy": 0.8097,
    "balanced_acc": 0.793,
-   "F1": 0.849,
-   "ROC_AUC": 0.8843,
-   "Brier": 0.1327
+   "F1": 0.8488,
+   "ROC_AUC": 0.8846,
+   "Brier": 0.1326
   },
   "Random Forest": {
    "group": "Bagging",
-   "accuracy": 0.8112,
-   "balanced_acc": 0.7924,
-   "F1": 0.8511,
-   "ROC_AUC": 0.8858,
-   "Brier": 0.1321
+   "accuracy": 0.8116,
+   "balanced_acc": 0.7922,
+   "F1": 0.8516,
+   "ROC_AUC": 0.8864,
+   "Brier": 0.1317
   },
   "AdaBoost": {
    "group": "Boosting",
-   "accuracy": 0.8037,
-   "balanced_acc": 0.7861,
-   "F1": 0.8444,
-   "ROC_AUC": 0.8817,
-   "Brier": 0.1917
+   "accuracy": 0.8063,
+   "balanced_acc": 0.7891,
+   "F1": 0.8462,
+   "ROC_AUC": 0.8797,
+   "Brier": 0.2165
   },
   "XGBoost": {
    "group": "Boosting",
-   "accuracy": 0.8118,
-   "balanced_acc": 0.7938,
+   "accuracy": 0.8126,
+   "balanced_acc": 0.7961,
    "F1": 0.8511,
    "ROC_AUC": 0.8884,
    "Brier": 0.1308
   },
   "LightGBM": {
    "group": "Boosting",
-   "accuracy": 0.8132,
-   "balanced_acc": 0.7952,
-   "F1": 0.8523,
-   "ROC_AUC": 0.8854,
-   "Brier": 0.1326
+   "accuracy": 0.8129,
+   "balanced_acc": 0.7949,
+   "F1": 0.8521,
+   "ROC_AUC": 0.8872,
+   "Brier": 0.1314
   },
   "CatBoost": {
    "group": "Boosting",
-   "accuracy": 0.8117,
-   "balanced_acc": 0.7936,
-   "F1": 0.8511,
-   "ROC_AUC": 0.8886,
-   "Brier": 0.1308
+   "accuracy": 0.8136,
+   "balanced_acc": 0.7958,
+   "F1": 0.8525,
+   "ROC_AUC": 0.8899,
+   "Brier": 0.13
   },
   "Soft voting": {
    "group": "Voting",
-   "accuracy": 0.8156,
-   "balanced_acc": 0.7973,
-   "F1": 0.8544,
+   "accuracy": 0.8149,
+   "balanced_acc": 0.7971,
+   "F1": 0.8536,
    "ROC_AUC": 0.8892,
    "Brier": 0.1303
   },
   "Stacking": {
    "group": "Stacking",
-   "accuracy": 0.8135,
-   "balanced_acc": 0.79,
-   "F1": 0.855,
-   "ROC_AUC": 0.8891,
-   "Brier": 0.1332
+   "accuracy": 0.8126,
+   "balanced_acc": 0.7892,
+   "F1": 0.8543,
+   "ROC_AUC": 0.889,
+   "Brier": 0.133
   },
   "ARIMA alone": {
    "group": "Hybrid",
@@ -421,11 +421,11 @@
   },
   "Hybrid: ARIMA + RF": {
    "group": "Hybrid",
-   "accuracy": 0.8169,
-   "balanced_acc": 0.8015,
-   "F1": 0.8541,
-   "ROC_AUC": 0.888,
-   "Brier": 0.1308
+   "accuracy": 0.816,
+   "balanced_acc": 0.8001,
+   "F1": 0.8537,
+   "ROC_AUC": 0.8876,
+   "Brier": 0.1309
   }
  },
  "test_by_zone": [
@@ -453,11 +453,11 @@
    "zone": "Wet",
    "model": "Decision tree",
    "rain days": 0.8039,
-   "accuracy": 0.8453,
-   "balanced_acc": 0.7159,
-   "F1": 0.9061,
-   "ROC_AUC": 0.8381,
-   "Brier": 0.1091
+   "accuracy": 0.8506,
+   "balanced_acc": 0.7238,
+   "F1": 0.9094,
+   "ROC_AUC": 0.8576,
+   "Brier": 0.1077
   },
   {
    "zone": "Wet",
@@ -466,67 +466,67 @@
    "accuracy": 0.858,
    "balanced_acc": 0.7128,
    "F1": 0.9151,
-   "ROC_AUC": 0.8742,
-   "Brier": 0.101
+   "ROC_AUC": 0.8741,
+   "Brier": 0.1011
   },
   {
    "zone": "Wet",
    "model": "XGBoost",
    "rain days": 0.8039,
-   "accuracy": 0.8594,
-   "balanced_acc": 0.7178,
-   "F1": 0.9158,
-   "ROC_AUC": 0.8801,
-   "Brier": 0.1
+   "accuracy": 0.8603,
+   "balanced_acc": 0.7234,
+   "F1": 0.9161,
+   "ROC_AUC": 0.8807,
+   "Brier": 0.0997
   },
   {
    "zone": "Wet",
    "model": "LightGBM",
    "rain days": 0.8039,
-   "accuracy": 0.8642,
-   "balanced_acc": 0.7267,
-   "F1": 0.9185,
+   "accuracy": 0.8603,
+   "balanced_acc": 0.7193,
+   "F1": 0.9163,
    "ROC_AUC": 0.8771,
-   "Brier": 0.1007
+   "Brier": 0.1006
   },
   {
    "zone": "Wet",
    "model": "CatBoost",
    "rain days": 0.8039,
-   "accuracy": 0.8594,
-   "balanced_acc": 0.7187,
-   "F1": 0.9157,
-   "ROC_AUC": 0.8793,
-   "Brier": 0.1001
+   "accuracy": 0.8606,
+   "balanced_acc": 0.7176,
+   "F1": 0.9166,
+   "ROC_AUC": 0.8809,
+   "Brier": 0.0997
   },
   {
    "zone": "Wet",
    "model": "Soft voting",
    "rain days": 0.8039,
-   "accuracy": 0.8632,
-   "balanced_acc": 0.7225,
-   "F1": 0.9181,
-   "ROC_AUC": 0.8803,
-   "Brier": 0.0996
+   "accuracy": 0.8615,
+   "balanced_acc": 0.7201,
+   "F1": 0.9171,
+   "ROC_AUC": 0.8799,
+   "Brier": 0.0998
   },
   {
    "zone": "Wet",
    "model": "Stacking",
    "rain days": 0.8039,
-   "accuracy": 0.8618,
-   "balanced_acc": 0.7078,
-   "F1": 0.9179,
-   "ROC_AUC": 0.879,
-   "Brier": 0.1021
+   "accuracy": 0.8611,
+   "balanced_acc": 0.706,
+   "F1": 0.9175,
+   "ROC_AUC": 0.8787,
+   "Brier": 0.1022
   },
   {
    "zone": "Wet",
    "model": "Hybrid: ARIMA + RF",
    "rain days": 0.8039,
-   "accuracy": 0.8639,
-   "balanced_acc": 0.728,
-   "F1": 0.9183,
-   "ROC_AUC": 0.8785,
+   "accuracy": 0.8625,
+   "balanced_acc": 0.7248,
+   "F1": 0.9175,
+   "ROC_AUC": 0.8774,
    "Brier": 0.1
   },
   {
@@ -553,81 +553,81 @@
    "zone": "Intermediate",
    "model": "Decision tree",
    "rain days": 0.5477,
-   "accuracy": 0.7626,
-   "balanced_acc": 0.7584,
-   "F1": 0.7874,
-   "ROC_AUC": 0.8331,
-   "Brier": 0.1659
+   "accuracy": 0.7426,
+   "balanced_acc": 0.7339,
+   "F1": 0.7783,
+   "ROC_AUC": 0.8333,
+   "Brier": 0.1665
   },
   {
    "zone": "Intermediate",
    "model": "Random Forest",
    "rain days": 0.5477,
-   "accuracy": 0.7703,
-   "balanced_acc": 0.7634,
-   "F1": 0.7993,
-   "ROC_AUC": 0.8467,
-   "Brier": 0.1598
+   "accuracy": 0.7722,
+   "balanced_acc": 0.765,
+   "F1": 0.8015,
+   "ROC_AUC": 0.8469,
+   "Brier": 0.1597
   },
   {
    "zone": "Intermediate",
    "model": "XGBoost",
    "rain days": 0.5477,
-   "accuracy": 0.7645,
-   "balanced_acc": 0.7576,
-   "F1": 0.7943,
-   "ROC_AUC": 0.8503,
-   "Brier": 0.1581
+   "accuracy": 0.7698,
+   "balanced_acc": 0.7635,
+   "F1": 0.7978,
+   "ROC_AUC": 0.8491,
+   "Brier": 0.1585
   },
   {
    "zone": "Intermediate",
    "model": "LightGBM",
    "rain days": 0.5477,
-   "accuracy": 0.7674,
-   "balanced_acc": 0.7613,
-   "F1": 0.7953,
-   "ROC_AUC": 0.8463,
-   "Brier": 0.1605
+   "accuracy": 0.7712,
+   "balanced_acc": 0.7643,
+   "F1": 0.8002,
+   "ROC_AUC": 0.8494,
+   "Brier": 0.1586
   },
   {
    "zone": "Intermediate",
    "model": "CatBoost",
    "rain days": 0.5477,
-   "accuracy": 0.7707,
-   "balanced_acc": 0.764,
-   "F1": 0.7995,
-   "ROC_AUC": 0.8504,
-   "Brier": 0.1581
+   "accuracy": 0.7736,
+   "balanced_acc": 0.7673,
+   "F1": 0.8013,
+   "ROC_AUC": 0.8517,
+   "Brier": 0.1573
   },
   {
    "zone": "Intermediate",
    "model": "Soft voting",
    "rain days": 0.5477,
-   "accuracy": 0.7717,
-   "balanced_acc": 0.7649,
-   "F1": 0.8005,
-   "ROC_AUC": 0.851,
-   "Brier": 0.1577
+   "accuracy": 0.7745,
+   "balanced_acc": 0.7678,
+   "F1": 0.803,
+   "ROC_AUC": 0.8508,
+   "Brier": 0.1578
   },
   {
    "zone": "Intermediate",
    "model": "Stacking",
    "rain days": 0.5477,
-   "accuracy": 0.7726,
-   "balanced_acc": 0.7637,
-   "F1": 0.8051,
-   "ROC_AUC": 0.8513,
+   "accuracy": 0.7684,
+   "balanced_acc": 0.7592,
+   "F1": 0.8018,
+   "ROC_AUC": 0.8504,
    "Brier": 0.1623
   },
   {
    "zone": "Intermediate",
    "model": "Hybrid: ARIMA + RF",
    "rain days": 0.5477,
-   "accuracy": 0.7803,
-   "balanced_acc": 0.7755,
-   "F1": 0.8044,
-   "ROC_AUC": 0.8476,
-   "Brier": 0.1588
+   "accuracy": 0.7788,
+   "balanced_acc": 0.774,
+   "F1": 0.8034,
+   "ROC_AUC": 0.8477,
+   "Brier": 0.1587
   },
   {
    "zone": "Dry",
@@ -653,101 +653,189 @@
    "zone": "Dry",
    "model": "Decision tree",
    "rain days": 0.4198,
-   "accuracy": 0.7636,
-   "balanced_acc": 0.7514,
-   "F1": 0.7057,
-   "ROC_AUC": 0.8309,
-   "Brier": 0.1632
+   "accuracy": 0.7629,
+   "balanced_acc": 0.752,
+   "F1": 0.7077,
+   "ROC_AUC": 0.8353,
+   "Brier": 0.1615
   },
   {
    "zone": "Dry",
    "model": "Random Forest",
    "rain days": 0.4198,
-   "accuracy": 0.7763,
-   "balanced_acc": 0.7656,
-   "F1": 0.7239,
-   "ROC_AUC": 0.8484,
-   "Brier": 0.155
+   "accuracy": 0.776,
+   "balanced_acc": 0.7659,
+   "F1": 0.7249,
+   "ROC_AUC": 0.8501,
+   "Brier": 0.154
   },
   {
    "zone": "Dry",
    "model": "XGBoost",
    "rain days": 0.4198,
-   "accuracy": 0.7798,
-   "balanced_acc": 0.7682,
-   "F1": 0.7262,
+   "accuracy": 0.7776,
+   "balanced_acc": 0.7647,
+   "F1": 0.7209,
    "ROC_AUC": 0.8503,
-   "Brier": 0.1535
+   "Brier": 0.1537
   },
   {
    "zone": "Dry",
    "model": "LightGBM",
    "rain days": 0.4198,
-   "accuracy": 0.7757,
-   "balanced_acc": 0.7653,
+   "accuracy": 0.7776,
+   "balanced_acc": 0.7661,
    "F1": 0.724,
-   "ROC_AUC": 0.8455,
-   "Brier": 0.1566
+   "ROC_AUC": 0.8484,
+   "Brier": 0.1544
   },
   {
    "zone": "Dry",
    "model": "CatBoost",
    "rain days": 0.4198,
-   "accuracy": 0.7753,
-   "balanced_acc": 0.7641,
-   "F1": 0.7218,
-   "ROC_AUC": 0.8502,
-   "Brier": 0.1537
+   "accuracy": 0.7776,
+   "balanced_acc": 0.7658,
+   "F1": 0.7233,
+   "ROC_AUC": 0.8524,
+   "Brier": 0.1522
   },
   {
    "zone": "Dry",
    "model": "Soft voting",
    "rain days": 0.4198,
-   "accuracy": 0.7814,
-   "balanced_acc": 0.7707,
-   "F1": 0.73,
-   "ROC_AUC": 0.8513,
-   "Brier": 0.1531
+   "accuracy": 0.7795,
+   "balanced_acc": 0.7676,
+   "F1": 0.7253,
+   "ROC_AUC": 0.8517,
+   "Brier": 0.1528
   },
   {
    "zone": "Dry",
    "model": "Stacking",
    "rain days": 0.4198,
-   "accuracy": 0.7763,
-   "balanced_acc": 0.77,
-   "F1": 0.7327,
-   "ROC_AUC": 0.8516,
-   "Brier": 0.1552
+   "accuracy": 0.7776,
+   "balanced_acc": 0.7706,
+   "F1": 0.733,
+   "ROC_AUC": 0.8522,
+   "Brier": 0.1546
   },
   {
    "zone": "Dry",
    "model": "Hybrid: ARIMA + RF",
    "rain days": 0.4198,
-   "accuracy": 0.7785,
-   "balanced_acc": 0.7653,
-   "F1": 0.7213,
-   "ROC_AUC": 0.851,
-   "Brier": 0.1531
+   "accuracy": 0.7788,
+   "balanced_acc": 0.7663,
+   "F1": 0.7232,
+   "ROC_AUC": 0.8503,
+   "Brier": 0.1535
   }
  ],
  "test_by_season_zone": {
   "Wet": {
-   "First inter-monsoon": 0.8633,
-   "South-west monsoon": 0.8341,
-   "Second inter-monsoon": 0.8443,
-   "North-east monsoon": 0.8246
+   "First inter-monsoon": 0.8652,
+   "South-west monsoon": 0.8336,
+   "Second inter-monsoon": 0.8409,
+   "North-east monsoon": 0.8241
   },
   "Intermediate": {
-   "First inter-monsoon": 0.8493,
-   "South-west monsoon": 0.8363,
-   "Second inter-monsoon": 0.8208,
-   "North-east monsoon": 0.8381
+   "First inter-monsoon": 0.8514,
+   "South-west monsoon": 0.8337,
+   "Second inter-monsoon": 0.8194,
+   "North-east monsoon": 0.8398
   },
   "Dry": {
-   "First inter-monsoon": 0.7705,
-   "South-west monsoon": 0.8314,
-   "Second inter-monsoon": 0.8276,
-   "North-east monsoon": 0.845
+   "First inter-monsoon": 0.7728,
+   "South-west monsoon": 0.8316,
+   "Second inter-monsoon": 0.8308,
+   "North-east monsoon": 0.8435
+  }
+ },
+ "test_ci": {
+  "Baseline: persistence": {
+   "low": 0.7694,
+   "high": 0.795
+  },
+  "Decision tree": {
+   "low": 0.8639,
+   "high": 0.8845
+  },
+  "Random Forest": {
+   "low": 0.8753,
+   "high": 0.8963
+  },
+  "LightGBM": {
+   "low": 0.8758,
+   "high": 0.8975
+  },
+  "Hybrid: ARIMA + RF": {
+   "low": 0.8763,
+   "high": 0.8978
+  },
+  "XGBoost": {
+   "low": 0.877,
+   "high": 0.8988
+  },
+  "Stacking": {
+   "low": 0.8777,
+   "high": 0.8989
+  },
+  "Soft voting": {
+   "low": 0.8781,
+   "high": 0.8992
+  },
+  "CatBoost": {
+   "low": 0.8787,
+   "high": 0.8998
+  }
+ },
+ "shap_by_zone": {
+  "Wet": {
+   "precipitation_sum": 0.1386,
+   "precipitation_hours": 0.1179,
+   "zone": 0.0869,
+   "relative_humidity_2m_mean": 0.0656,
+   "et0_fao_evapotranspiration": 0.0393,
+   "humidity_change": 0.0399,
+   "wind_dir_sin": 0.0324,
+   "wet_days_7d": 0.039,
+   "doy_cos": 0.0485,
+   "doy_sin": 0.0314,
+   "wind_speed_10m_max": 0.0272,
+   "month_sin": 0.0286,
+   "season": 0.0371,
+   "dew_point_2m_mean": 0.0417
+  },
+  "Intermediate": {
+   "precipitation_sum": 0.153,
+   "precipitation_hours": 0.0985,
+   "zone": 0.0717,
+   "relative_humidity_2m_mean": 0.0769,
+   "et0_fao_evapotranspiration": 0.0494,
+   "humidity_change": 0.049,
+   "wind_dir_sin": 0.0473,
+   "wet_days_7d": 0.0364,
+   "doy_cos": 0.038,
+   "doy_sin": 0.0389,
+   "wind_speed_10m_max": 0.0308,
+   "month_sin": 0.0334,
+   "season": 0.0333,
+   "dew_point_2m_mean": 0.0281
+  },
+  "Dry": {
+   "precipitation_sum": 0.14,
+   "precipitation_hours": 0.1034,
+   "zone": 0.0867,
+   "relative_humidity_2m_mean": 0.0614,
+   "et0_fao_evapotranspiration": 0.0761,
+   "humidity_change": 0.0418,
+   "wind_dir_sin": 0.0377,
+   "wet_days_7d": 0.0385,
+   "doy_cos": 0.0273,
+   "doy_sin": 0.0399,
+   "wind_speed_10m_max": 0.0423,
+   "month_sin": 0.0373,
+   "season": 0.0284,
+   "dew_point_2m_mean": 0.0244
   }
  }
 }
