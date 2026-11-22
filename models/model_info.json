@@ -1,0 +1,753 @@
+{
+ "features": [
+  "temperature_2m_max",
+  "temperature_2m_min",
+  "temperature_2m_mean",
+  "relative_humidity_2m_mean",
+  "dew_point_2m_mean",
+  "pressure_msl_mean",
+  "cloud_cover_mean",
+  "precipitation_sum",
+  "precipitation_hours",
+  "wind_speed_10m_max",
+  "wind_gusts_10m_max",
+  "shortwave_radiation_sum",
+  "et0_fao_evapotranspiration",
+  "elevation",
+  "temp_range",
+  "rain_lag1",
+  "rain_lag2",
+  "rain_3d",
+  "rain_7d",
+  "wet_days_7d",
+  "pressure_change",
+  "humidity_change",
+  "temp_change",
+  "wind_dir_sin",
+  "wind_dir_cos",
+  "month_sin",
+  "month_cos",
+  "doy_sin",
+  "doy_cos",
+  "season_First inter-monsoon",
+  "season_South-west monsoon",
+  "season_Second inter-monsoon",
+  "season_North-east monsoon",
+  "zone_Wet",
+  "zone_Intermediate",
+  "zone_Dry",
+  "city_Anuradhapura",
+  "city_Badulla",
+  "city_Colombo",
+  "city_Galle",
+  "city_Jaffna",
+  "city_Kandy",
+  "city_Nuwara Eliya",
+  "city_Ratnapura",
+  "city_Trincomalee"
+ ],
+ "features_hybrid": [
+  "temperature_2m_max",
+  "temperature_2m_min",
+  "temperature_2m_mean",
+  "relative_humidity_2m_mean",
+  "dew_point_2m_mean",
+  "pressure_msl_mean",
+  "cloud_cover_mean",
+  "precipitation_sum",
+  "precipitation_hours",
+  "wind_speed_10m_max",
+  "wind_gusts_10m_max",
+  "shortwave_radiation_sum",
+  "et0_fao_evapotranspiration",
+  "elevation",
+  "temp_range",
+  "rain_lag1",
+  "rain_lag2",
+  "rain_3d",
+  "rain_7d",
+  "wet_days_7d",
+  "pressure_change",
+  "humidity_change",
+  "temp_change",
+  "wind_dir_sin",
+  "wind_dir_cos",
+  "month_sin",
+  "month_cos",
+  "doy_sin",
+  "doy_cos",
+  "season_First inter-monsoon",
+  "season_South-west monsoon",
+  "season_Second inter-monsoon",
+  "season_North-east monsoon",
+  "zone_Wet",
+  "zone_Intermediate",
+  "zone_Dry",
+  "city_Anuradhapura",
+  "city_Badulla",
+  "city_Colombo",
+  "city_Galle",
+  "city_Jaffna",
+  "city_Kandy",
+  "city_Nuwara Eliya",
+  "city_Ratnapura",
+  "city_Trincomalee",
+  "arima_tomorrow"
+ ],
+ "cities": [
+  "Anuradhapura",
+  "Badulla",
+  "Colombo",
+  "Galle",
+  "Jaffna",
+  "Kandy",
+  "Nuwara Eliya",
+  "Ratnapura",
+  "Trincomalee"
+ ],
+ "zone": {
+  "Ratnapura": "Wet",
+  "Galle": "Wet",
+  "Nuwara Eliya": "Wet",
+  "Colombo": "Wet",
+  "Badulla": "Intermediate",
+  "Kandy": "Intermediate",
+  "Trincomalee": "Dry",
+  "Anuradhapura": "Dry",
+  "Jaffna": "Dry"
+ },
+ "zone_threshold": {
+  "Wet": 0.8,
+  "Intermediate": 0.67,
+  "Dry": 0.46
+ },
+ "vote_models": [
+  "Random Forest",
+  "XGBoost",
+  "LightGBM",
+  "CatBoost"
+ ],
+ "files": {
+  "Random Forest": "random_forest",
+  "XGBoost": "xgboost",
+  "LightGBM": "lightgbm",
+  "CatBoost": "catboost",
+  "Hybrid: ARIMA + RF": "hybrid_arima_rf",
+  "RF regressor": "rf_regressor",
+  "ANN regressor": "ann_regressor"
+ },
+ "rf_ann_weights": {
+  "intercept": -0.01862100686565138,
+  "rf": 0.5527243936344921,
+  "ann": 0.4717410354798011
+ },
+ "regression_results": {
+  "Baseline: persistence (today's rain)": {
+   "MAE (mm)": 5.3259,
+   "RMSE (mm)": 12.2681,
+   "R2": 0.0608
+  },
+  "Baseline: climatology (city mean)": {
+   "MAE (mm)": 6.6815,
+   "RMSE (mm)": 12.4223,
+   "R2": 0.037
+  },
+  "Random Forest": {
+   "MAE (mm)": 4.4133,
+   "RMSE (mm)": 10.6863,
+   "R2": 0.2874
+  },
+  "ANN (MLP)": {
+   "MAE (mm)": 4.3707,
+   "RMSE (mm)": 10.3363,
+   "R2": 0.3333
+  },
+  "Hybrid: RF + ANN": {
+   "MAE (mm)": 4.3394,
+   "RMSE (mm)": 10.3778,
+   "R2": 0.3279
+  }
+ },
+ "arima_order": [
+  2,
+  0,
+  1
+ ],
+ "arima_params": {
+  "Anuradhapura": [
+   0.10744003348161373,
+   -0.2770312949328819,
+   0.20102011045984086,
+   -0.43305307006338895,
+   -0.11931470201989364,
+   1.1873792532495289,
+   -0.3018554340721711,
+   -0.66352060645704,
+   0.528275382539348
+  ],
+  "Badulla": [
+   0.16554198792062821,
+   -0.16121280372964036,
+   0.3016515725260058,
+   -0.4206487400143458,
+   -0.21623120243498456,
+   1.1324968117933636,
+   -0.2766103573918182,
+   -0.556017806667877,
+   0.6763946427676536
+  ],
+  "Colombo": [
+   0.1926316753142701,
+   -0.3908629878841684,
+   -0.46365337889075514,
+   -0.43354321597838447,
+   -0.1325992783633845,
+   1.180324608145137,
+   -0.3073336935092505,
+   -0.6647393036850552,
+   0.5820268155573741
+  ],
+  "Galle": [
+   0.21360967424144153,
+   -0.27643136176285604,
+   -0.3321335343026677,
+   -0.360004194494145,
+   -0.10854389342041879,
+   1.1829845342173368,
+   -0.3100863810068957,
+   -0.6739556312433902,
+   0.5681582570024784
+  ],
+  "Jaffna": [
+   0.05752760181467916,
+   -0.4664175481973904,
+   0.24264485395303587,
+   -0.38495137732873697,
+   -0.028219903820416795,
+   1.36098929521495,
+   -0.4368680208694107,
+   -0.7734729900671903,
+   0.4999007960868084
+  ],
+  "Kandy": [
+   0.15152716827270427,
+   -0.27132405914306396,
+   0.15899995755425694,
+   -0.35142704126039676,
+   -0.10502315786748764,
+   1.2030848834390546,
+   -0.33303536003593054,
+   -0.6257660248381932,
+   0.6342581860321658
+  ],
+  "Nuwara Eliya": [
+   0.1682269377992866,
+   -0.3791008447223224,
+   -0.1487373755383054,
+   -0.3786185934645933,
+   -0.14733061563325836,
+   1.273121906105671,
+   -0.38260056193781106,
+   -0.6846136648172153,
+   0.6379523618053181
+  ],
+  "Ratnapura": [
+   0.2996929344911698,
+   -0.06643344742299531,
+   0.04937595226525322,
+   -0.3594947576464649,
+   -0.1192232978424622,
+   1.1496274315382105,
+   -0.2998306326548319,
+   -0.5973110965582008,
+   0.7227119877456417
+  ],
+  "Trincomalee": [
+   0.13876712841546973,
+   -0.2923408886205033,
+   0.5374175330725195,
+   -0.33948648090155276,
+   0.01180600558621534,
+   1.1100895349536661,
+   -0.2756644932603632,
+   -0.5145336469222843,
+   0.5149849221066446
+  ]
+ },
+ "city_coords": {
+  "Anuradhapura": {
+   "lat": 8.25,
+   "lon": 80.5,
+   "elevation": 93.0
+  },
+  "Badulla": {
+   "lat": 7.0,
+   "lon": 81.0,
+   "elevation": 662.0
+  },
+  "Colombo": {
+   "lat": 7.0,
+   "lon": 80.0,
+   "elevation": 3.0
+  },
+  "Galle": {
+   "lat": 6.25,
+   "lon": 80.25,
+   "elevation": 0.0
+  },
+  "Jaffna": {
+   "lat": 9.75,
+   "lon": 80.0,
+   "elevation": 8.0
+  },
+  "Kandy": {
+   "lat": 7.25,
+   "lon": 80.75,
+   "elevation": 518.0
+  },
+  "Nuwara Eliya": {
+   "lat": 7.0,
+   "lon": 80.75,
+   "elevation": 1868.0
+  },
+  "Ratnapura": {
+   "lat": 6.75,
+   "lon": 80.5,
+   "elevation": 27.0
+  },
+  "Trincomalee": {
+   "lat": 8.5,
+   "lon": 81.25,
+   "elevation": 14.0
+  }
+ },
+ "trained_until": "2026-11-14",
+ "test_results": {
+  "Baseline: climatology": {
+   "group": "Baseline",
+   "accuracy": 0.6724,
+   "balanced_acc": 0.6407,
+   "F1": 0.7452,
+   "ROC_AUC": 0.7125,
+   "Brier": 0.2044
+  },
+  "Baseline: persistence": {
+   "group": "Baseline",
+   "accuracy": 0.7946,
+   "balanced_acc": 0.7822,
+   "F1": 0.8341,
+   "ROC_AUC": 0.7822,
+   "Brier": 0.2054
+  },
+  "Decision tree": {
+   "group": "Single tree",
+   "accuracy": 0.7997,
+   "balanced_acc": 0.7851,
+   "F1": 0.8395,
+   "ROC_AUC": 0.8681,
+   "Brier": 0.1398
+  },
+  "Bagging (trees)": {
+   "group": "Bagging",
+   "accuracy": 0.8099,
+   "balanced_acc": 0.793,
+   "F1": 0.849,
+   "ROC_AUC": 0.8843,
+   "Brier": 0.1327
+  },
+  "Random Forest": {
+   "group": "Bagging",
+   "accuracy": 0.8112,
+   "balanced_acc": 0.7924,
+   "F1": 0.8511,
+   "ROC_AUC": 0.8858,
+   "Brier": 0.1321
+  },
+  "AdaBoost": {
+   "group": "Boosting",
+   "accuracy": 0.8037,
+   "balanced_acc": 0.7861,
+   "F1": 0.8444,
+   "ROC_AUC": 0.8817,
+   "Brier": 0.1917
+  },
+  "XGBoost": {
+   "group": "Boosting",
+   "accuracy": 0.8118,
+   "balanced_acc": 0.7938,
+   "F1": 0.8511,
+   "ROC_AUC": 0.8884,
+   "Brier": 0.1308
+  },
+  "LightGBM": {
+   "group": "Boosting",
+   "accuracy": 0.8132,
+   "balanced_acc": 0.7952,
+   "F1": 0.8523,
+   "ROC_AUC": 0.8854,
+   "Brier": 0.1326
+  },
+  "CatBoost": {
+   "group": "Boosting",
+   "accuracy": 0.8117,
+   "balanced_acc": 0.7936,
+   "F1": 0.8511,
+   "ROC_AUC": 0.8886,
+   "Brier": 0.1308
+  },
+  "Soft voting": {
+   "group": "Voting",
+   "accuracy": 0.8156,
+   "balanced_acc": 0.7973,
+   "F1": 0.8544,
+   "ROC_AUC": 0.8892,
+   "Brier": 0.1303
+  },
+  "Stacking": {
+   "group": "Stacking",
+   "accuracy": 0.8135,
+   "balanced_acc": 0.79,
+   "F1": 0.855,
+   "ROC_AUC": 0.8891,
+   "Brier": 0.1332
+  },
+  "ARIMA alone": {
+   "group": "Hybrid",
+   "accuracy": 0.8061,
+   "balanced_acc": 0.7784,
+   "F1": 0.851,
+   "ROC_AUC": 0.8752,
+   "Brier": null
+  },
+  "Hybrid: ARIMA + RF": {
+   "group": "Hybrid",
+   "accuracy": 0.8169,
+   "balanced_acc": 0.8015,
+   "F1": 0.8541,
+   "ROC_AUC": 0.888,
+   "Brier": 0.1308
+  }
+ },
+ "test_by_zone": [
+  {
+   "zone": "Wet",
+   "model": "Baseline: climatology",
+   "rain days": 0.8039,
+   "accuracy": 0.8039,
+   "balanced_acc": 0.5,
+   "F1": 0.8913,
+   "ROC_AUC": 0.5981,
+   "Brier": 0.1541
+  },
+  {
+   "zone": "Wet",
+   "model": "Baseline: persistence",
+   "rain days": 0.8039,
+   "accuracy": 0.8406,
+   "balanced_acc": 0.7465,
+   "F1": 0.9009,
+   "ROC_AUC": 0.7465,
+   "Brier": 0.1594
+  },
+  {
+   "zone": "Wet",
+   "model": "Decision tree",
+   "rain days": 0.8039,
+   "accuracy": 0.8453,
+   "balanced_acc": 0.7159,
+   "F1": 0.9061,
+   "ROC_AUC": 0.8381,
+   "Brier": 0.1091
+  },
+  {
+   "zone": "Wet",
+   "model": "Random Forest",
+   "rain days": 0.8039,
+   "accuracy": 0.858,
+   "balanced_acc": 0.7128,
+   "F1": 0.9151,
+   "ROC_AUC": 0.8742,
+   "Brier": 0.101
+  },
+  {
+   "zone": "Wet",
+   "model": "XGBoost",
+   "rain days": 0.8039,
+   "accuracy": 0.8594,
+   "balanced_acc": 0.7178,
+   "F1": 0.9158,
+   "ROC_AUC": 0.8801,
+   "Brier": 0.1
+  },
+  {
+   "zone": "Wet",
+   "model": "LightGBM",
+   "rain days": 0.8039,
+   "accuracy": 0.8642,
+   "balanced_acc": 0.7267,
+   "F1": 0.9185,
+   "ROC_AUC": 0.8771,
+   "Brier": 0.1007
+  },
+  {
+   "zone": "Wet",
+   "model": "CatBoost",
+   "rain days": 0.8039,
+   "accuracy": 0.8594,
+   "balanced_acc": 0.7187,
+   "F1": 0.9157,
+   "ROC_AUC": 0.8793,
+   "Brier": 0.1001
+  },
+  {
+   "zone": "Wet",
+   "model": "Soft voting",
+   "rain days": 0.8039,
+   "accuracy": 0.8632,
+   "balanced_acc": 0.7225,
+   "F1": 0.9181,
+   "ROC_AUC": 0.8803,
+   "Brier": 0.0996
+  },
+  {
+   "zone": "Wet",
+   "model": "Stacking",
+   "rain days": 0.8039,
+   "accuracy": 0.8618,
+   "balanced_acc": 0.7078,
+   "F1": 0.9179,
+   "ROC_AUC": 0.879,
+   "Brier": 0.1021
+  },
+  {
+   "zone": "Wet",
+   "model": "Hybrid: ARIMA + RF",
+   "rain days": 0.8039,
+   "accuracy": 0.8639,
+   "balanced_acc": 0.728,
+   "F1": 0.9183,
+   "ROC_AUC": 0.8785,
+   "Brier": 0.1
+  },
+  {
+   "zone": "Intermediate",
+   "model": "Baseline: climatology",
+   "rain days": 0.5477,
+   "accuracy": 0.5477,
+   "balanced_acc": 0.5,
+   "F1": 0.7077,
+   "ROC_AUC": 0.5168,
+   "Brier": 0.2479
+  },
+  {
+   "zone": "Intermediate",
+   "model": "Baseline: persistence",
+   "rain days": 0.5477,
+   "accuracy": 0.7598,
+   "balanced_acc": 0.7575,
+   "F1": 0.7809,
+   "ROC_AUC": 0.7575,
+   "Brier": 0.2402
+  },
+  {
+   "zone": "Intermediate",
+   "model": "Decision tree",
+   "rain days": 0.5477,
+   "accuracy": 0.7626,
+   "balanced_acc": 0.7584,
+   "F1": 0.7874,
+   "ROC_AUC": 0.8331,
+   "Brier": 0.1659
+  },
+  {
+   "zone": "Intermediate",
+   "model": "Random Forest",
+   "rain days": 0.5477,
+   "accuracy": 0.7703,
+   "balanced_acc": 0.7634,
+   "F1": 0.7993,
+   "ROC_AUC": 0.8467,
+   "Brier": 0.1598
+  },
+  {
+   "zone": "Intermediate",
+   "model": "XGBoost",
+   "rain days": 0.5477,
+   "accuracy": 0.7645,
+   "balanced_acc": 0.7576,
+   "F1": 0.7943,
+   "ROC_AUC": 0.8503,
+   "Brier": 0.1581
+  },
+  {
+   "zone": "Intermediate",
+   "model": "LightGBM",
+   "rain days": 0.5477,
+   "accuracy": 0.7674,
+   "balanced_acc": 0.7613,
+   "F1": 0.7953,
+   "ROC_AUC": 0.8463,
+   "Brier": 0.1605
+  },
+  {
+   "zone": "Intermediate",
+   "model": "CatBoost",
+   "rain days": 0.5477,
+   "accuracy": 0.7707,
+   "balanced_acc": 0.764,
+   "F1": 0.7995,
+   "ROC_AUC": 0.8504,
+   "Brier": 0.1581
+  },
+  {
+   "zone": "Intermediate",
+   "model": "Soft voting",
+   "rain days": 0.5477,
+   "accuracy": 0.7717,
+   "balanced_acc": 0.7649,
+   "F1": 0.8005,
+   "ROC_AUC": 0.851,
+   "Brier": 0.1577
+  },
+  {
+   "zone": "Intermediate",
+   "model": "Stacking",
+   "rain days": 0.5477,
+   "accuracy": 0.7726,
+   "balanced_acc": 0.7637,
+   "F1": 0.8051,
+   "ROC_AUC": 0.8513,
+   "Brier": 0.1623
+  },
+  {
+   "zone": "Intermediate",
+   "model": "Hybrid: ARIMA + RF",
+   "rain days": 0.5477,
+   "accuracy": 0.7803,
+   "balanced_acc": 0.7755,
+   "F1": 0.8044,
+   "ROC_AUC": 0.8476,
+   "Brier": 0.1588
+  },
+  {
+   "zone": "Dry",
+   "model": "Baseline: climatology",
+   "rain days": 0.4198,
+   "accuracy": 0.5802,
+   "balanced_acc": 0.5,
+   "F1": 0.0,
+   "ROC_AUC": 0.5378,
+   "Brier": 0.2425
+  },
+  {
+   "zone": "Dry",
+   "model": "Baseline: persistence",
+   "rain days": 0.4198,
+   "accuracy": 0.7566,
+   "balanced_acc": 0.7502,
+   "F1": 0.7101,
+   "ROC_AUC": 0.7502,
+   "Brier": 0.2434
+  },
+  {
+   "zone": "Dry",
+   "model": "Decision tree",
+   "rain days": 0.4198,
+   "accuracy": 0.7636,
+   "balanced_acc": 0.7514,
+   "F1": 0.7057,
+   "ROC_AUC": 0.8309,
+   "Brier": 0.1632
+  },
+  {
+   "zone": "Dry",
+   "model": "Random Forest",
+   "rain days": 0.4198,
+   "accuracy": 0.7763,
+   "balanced_acc": 0.7656,
+   "F1": 0.7239,
+   "ROC_AUC": 0.8484,
+   "Brier": 0.155
+  },
+  {
+   "zone": "Dry",
+   "model": "XGBoost",
+   "rain days": 0.4198,
+   "accuracy": 0.7798,
+   "balanced_acc": 0.7682,
+   "F1": 0.7262,
+   "ROC_AUC": 0.8503,
+   "Brier": 0.1535
+  },
+  {
+   "zone": "Dry",
+   "model": "LightGBM",
+   "rain days": 0.4198,
+   "accuracy": 0.7757,
+   "balanced_acc": 0.7653,
+   "F1": 0.724,
+   "ROC_AUC": 0.8455,
+   "Brier": 0.1566
+  },
+  {
+   "zone": "Dry",
+   "model": "CatBoost",
+   "rain days": 0.4198,
+   "accuracy": 0.7753,
+   "balanced_acc": 0.7641,
+   "F1": 0.7218,
+   "ROC_AUC": 0.8502,
+   "Brier": 0.1537
+  },
+  {
+   "zone": "Dry",
+   "model": "Soft voting",
+   "rain days": 0.4198,
+   "accuracy": 0.7814,
+   "balanced_acc": 0.7707,
+   "F1": 0.73,
+   "ROC_AUC": 0.8513,
+   "Brier": 0.1531
+  },
+  {
+   "zone": "Dry",
+   "model": "Stacking",
+   "rain days": 0.4198,
+   "accuracy": 0.7763,
+   "balanced_acc": 0.77,
+   "F1": 0.7327,
+   "ROC_AUC": 0.8516,
+   "Brier": 0.1552
+  },
+  {
+   "zone": "Dry",
+   "model": "Hybrid: ARIMA + RF",
+   "rain days": 0.4198,
+   "accuracy": 0.7785,
+   "balanced_acc": 0.7653,
+   "F1": 0.7213,
+   "ROC_AUC": 0.851,
+   "Brier": 0.1531
+  }
+ ],
+ "test_by_season_zone": {
+  "Wet": {
+   "First inter-monsoon": 0.8633,
+   "South-west monsoon": 0.8341,
+   "Second inter-monsoon": 0.8443,
+   "North-east monsoon": 0.8246
+  },
+  "Intermediate": {
+   "First inter-monsoon": 0.8493,
+   "South-west monsoon": 0.8363,
+   "Second inter-monsoon": 0.8208,
+   "North-east monsoon": 0.8381
+  },
+  "Dry": {
+   "First inter-monsoon": 0.7705,
+   "South-west monsoon": 0.8314,
+   "Second inter-monsoon": 0.8276,
+   "North-east monsoon": 0.845
+  }
+ }
+}
