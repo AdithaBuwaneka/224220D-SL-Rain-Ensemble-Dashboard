@@ -8,13 +8,43 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import shap
+from plotly.subplots import make_subplots
 import streamlit as st
 import streamlit.components.v1 as components
 
 from src.predict import CLASSIFIERS, fetch_live, load_era5_history, load_models, predict
 
 st.set_page_config(page_title="Sri Lanka rain tomorrow", page_icon=":material/rainy:", layout="wide")
-ZONE_COLORS = {"Wet": "#1f77b4", "Intermediate": "#2ca02c", "Dry": "#d62728"}
+# colours checked for colour-blind readers in light and dark mode (same set as the notebook)
+ZONE_COLORS = {"Wet": "#2a78d6", "Intermediate": "#199e70", "Dry": "#d95926"}
+FAMILY = {"Baseline": "Baseline or single tree", "Single tree": "Baseline or single tree", "Bagging": "Bagging",
+          "Boosting": "Boosting", "Voting": "Voting, stacking or hybrid", "Stacking": "Voting, stacking or hybrid",
+          "Hybrid": "Voting, stacking or hybrid"}
+FAMILY_COLORS = {"Bagging": "#2a78d6", "Boosting": "#d95926", "Voting, stacking or hybrid": "#199e70",
+                 "Baseline or single tree": "#b5b4ad"}
+NICE = {
+    "temperature_2m_max": "Highest temperature today", "temperature_2m_min": "Lowest temperature today",
+    "temperature_2m_mean": "Mean temperature today", "relative_humidity_2m_mean": "Humidity today",
+    "dew_point_2m_mean": "Dew point today", "pressure_msl_mean": "Air pressure today",
+    "cloud_cover_mean": "Cloud cover today", "precipitation_sum": "Rain today (mm)",
+    "precipitation_hours": "Hours of rain today", "wind_speed_10m_max": "Highest wind speed today",
+    "wind_gusts_10m_max": "Strongest wind gust today", "shortwave_radiation_sum": "Sunshine today (solar radiation)",
+    "et0_fao_evapotranspiration": "Evaporation today", "elevation": "Height above sea level",
+    "temp_range": "Temperature range today", "rain_lag1": "Rain yesterday", "rain_lag2": "Rain 2 days ago",
+    "rain_3d": "Rain in the last 3 days", "rain_7d": "Rain in the last 7 days", "wet_days_7d": "Rainy days in the last 7",
+    "pressure_change": "Pressure change since yesterday", "humidity_change": "Humidity change since yesterday",
+    "temp_change": "Temperature change since yesterday", "wind_dir_sin": "Wind direction (east or west)",
+    "wind_dir_cos": "Wind direction (north or south)", "month_sin": "Time of year (month, sine)",
+    "month_cos": "Time of year (month, cosine)", "doy_sin": "Time of year (day, sine)", "doy_cos": "Time of year (day, cosine)",
+    "city": "City", "zone": "Zone", "season": "Monsoon season",
+}
+
+
+def nice(name):
+    for prefix, label in [("city_", "City: "), ("zone_", "Zone: "), ("season_", "Season: ")]:
+        if name.startswith(prefix):
+            return label + name[len(prefix):]
+    return NICE.get(name, name)
 MODEL_COLS = CLASSIFIERS + ["Soft voting", "Hybrid: ARIMA + RF"]
 
 
@@ -74,7 +104,7 @@ def icon_for(mm=None, chance=None, rain=None, expected=None):
     return "cloud_sun" if chance >= 0.4 else "sun"
 
 
-def weather_map_html(history, pred, day, info):
+def weather_map_html(history, pred, day):
     """Leaflet + OpenStreetMap weather map: last 7 days of real rain, then tomorrow's prediction (play / slider)."""
     cities = list(pred.index)
     frames = []
@@ -117,8 +147,8 @@ def weather_map_html(history, pred, day, info):
   @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
   #bar { display: flex; align-items: center; gap: 10px; padding: 10px 2px 0; color: #888; font-size: 14px; }
   #play { display: inline-flex; align-items: center; gap: 6px; border: 1px solid #bbb; background: #f0f2f6; color: #222; border-radius: 6px; padding: 4px 12px; cursor: pointer; }
-  #slider { flex: 1; accent-color: #1f77b4; }
-  #day { min-width: 120px; font-weight: 600; color: #1f77b4; }
+  #slider { flex: 1; accent-color: #2a78d6; }
+  #day { min-width: 120px; font-weight: 600; color: #2a78d6; }
   .legend { background: rgba(255,255,255,.9); padding: 4px 8px; border-radius: 6px; font-size: 13px; color: #1d3557; }
 </style>
 <div id="map"></div>
@@ -250,7 +280,7 @@ with tab_map:
     with left, st.container(border=True):
         st.markdown("**Weather report map**")
         st.caption("Opens on tomorrow's prediction. Press Play for the last 7 days of real rain, then tomorrow. Click a city for details.")
-        components.html(weather_map_html(history, pred, day, info), height=610)
+        components.html(weather_map_html(history, pred, day), height=610)
     with right, st.container(border=True):
         st.markdown("**Chance of rain by city**")
         st.caption("Bar colour = zone. The grey tick is the zone's cut-off for saying 'rain'.")
@@ -283,19 +313,20 @@ with tab_map:
             table[label] = actual.reindex(pred.index).round(1)
         st.dataframe(table, use_container_width=True)
         st.caption("Chance of rain = soft voting (average of Random Forest, XGBoost, LightGBM and CatBoost). "
-                   "'Rain' means 1 mm or more; the cut-off is set per zone (wet 0.80, intermediate 0.67, dry 0.46). "
+                   "'Rain' means 1 mm or more; the cut-off is set per zone ("
+                   + ", ".join(f"{z.lower()} {t:.2f}" for z, t in info["zone_threshold"].items()) + "). "
                    "Expected mm comes from the Random Forest + ANN hybrid."
                    + (" The last column is Open-Meteo's own forecast for tomorrow, shown only to compare."
                       if is_live else ""))
 
     with st.expander("What every model says"):
         votes = (pred[MODEL_COLS] * 100).round(0)
-        fig = go.Figure()
-        for col in MODEL_COLS:
-            fig.add_trace(go.Bar(name=col, x=votes.index, y=votes[col]))
-        fig.update_layout(barmode="group", yaxis_title="chance of rain (%)", height=380, margin=dict(t=10),
-                          legend=dict(orientation="h", y=1.12))
+        fig = px.imshow(votes.T, text_auto=".0f", color_continuous_scale="Blues", zmin=0, zmax=100, aspect="auto",
+                        labels=dict(x="", y="", color="chance (%)"), height=360)
+        fig.update_traces(hovertemplate="%{y}, %{x}: %{z:.0f}%<extra></extra>")
+        fig.update_layout(margin=dict(t=10))
         st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+        st.caption("Chance of rain (%) from each model. Soft voting is the average of the first four.")
 
 # ---------------------------------------------------------------- tab 2: SHAP
 with tab_why:
@@ -305,11 +336,28 @@ with tab_why:
                 f"**{pred.loc[city, 'CatBoost']:.0%}** chance of rain on {next_day.date()}.")
     explainer = shap.TreeExplainer(models["CatBoost"])
     sv = explainer(X.loc[[city]])
-    fig, ax = plt.subplots(figsize=(8, 5))
-    shap.plots.waterfall(sv[0], max_display=12, show=False)
-    st.pyplot(plt.gcf(), clear_figure=True)
-    st.caption("Red bars push the chance of rain up, blue bars push it down (SHAP values, in log-odds). "
-               "E[f(X)] is the average prediction and f(x) is this prediction.")
+    sv.feature_names = [nice(f) for f in X.columns]
+    left, right = st.columns([3, 2])
+    with left, st.container(border=True):
+        st.markdown(f"**What pushed the prediction for {city}**")
+        fig, ax = plt.subplots(figsize=(8, 5))
+        shap.plots.waterfall(sv[0], max_display=12, show=False)
+        plt.gcf().set_size_inches(6.4, 6.2)        # SHAP sets a wide figure; a narrower one keeps the text readable here
+        st.pyplot(plt.gcf(), clear_figure=True)
+        st.caption("Red bars push the chance of rain up, blue bars push it down (SHAP values, in log-odds). "
+                   "The number before each name is today's value. E[f(X)] is the average prediction and f(x) is "
+                   "this prediction.")
+    with right, st.container(border=True):
+        st.markdown("**What matters most in each zone (test years)**")
+        imp = pd.DataFrame(info["shap_by_zone"])[["Wet", "Intermediate", "Dry"]] * 100
+        imp.index = [nice(f) for f in imp.index]
+        fig = px.imshow(imp.round(1), text_auto=".1f", color_continuous_scale="Blues", aspect="auto", height=520,
+                        labels=dict(x="", y="", color="share (%)"))
+        fig.update_traces(hovertemplate="%{y}, %{x} zone: %{z:.1f}%<extra></extra>")
+        fig.update_layout(margin=dict(t=10), coloraxis_showscale=False)
+        st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+        st.caption("Share of the total SHAP importance (%) for each feature, by zone. City, zone and season columns "
+                   "are added together.")
 
 # ---------------------------------------------------------------- tab 3: model comparison
 with tab_models:
@@ -326,11 +374,29 @@ with tab_models:
     res = res.sort_values("ROC_AUC", ascending=False)
     c1, c2 = st.columns([3, 2])
     with c1:
-        fig = px.bar(res.reset_index(), x="ROC_AUC", y="index", color="group", orientation="h", height=480,
-                     range_x=[0.5, 0.95], labels={"index": "", "ROC_AUC": "ROC-AUC"}, text="ROC_AUC")
-        fig.update_traces(texttemplate="%{text:.3f}", textposition="outside", cliponaxis=False)
-        fig.update_layout(yaxis=dict(autorange="reversed"), margin=dict(t=10))
-        st.plotly_chart(fig, use_container_width=True)
+        # dots, not bars: the scores are close, and bars that do not start at 0 would exaggerate the gaps
+        ci = pd.DataFrame(info.get("test_ci", {})).T.reindex(res.index)
+        fig = go.Figure()
+        for fam, col in FAMILY_COLORS.items():
+            d = res[res["group"].map(FAMILY) == fam]
+            if d.empty:
+                continue
+            lo, hi = ci.loc[d.index, "low"], ci.loc[d.index, "high"]
+            hollow = fam.startswith("Baseline")
+            fig.add_trace(go.Scatter(
+                x=d["ROC_AUC"], y=d.index, mode="markers", name=fam,
+                marker=dict(size=11, color="rgba(0,0,0,0)" if hollow else col, line=dict(width=2, color=col)),
+                error_x=dict(type="data", symmetric=False, array=(hi - d["ROC_AUC"]).fillna(0),
+                             arrayminus=(d["ROC_AUC"] - lo).fillna(0), color="#9a9a94", thickness=1.5, width=4),
+                hovertext=[f"{m}: {v:.3f}" + ("" if pd.isna(a) else f" (95% interval {a:.3f} to {b:.3f})")
+                           for m, v, a, b in zip(d.index, d["ROC_AUC"], lo, hi)],
+                hovertemplate="%{hovertext}<extra></extra>"))
+        fig.update_layout(height=480, margin=dict(t=10), xaxis_title="ROC-AUC (dot) with 95% bootstrap interval",
+                          yaxis=dict(categoryorder="array", categoryarray=list(res.index[::-1])),
+                          legend=dict(orientation="h", y=-0.15))
+        st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+        st.caption("Intervals come from 1,000 resamples of the test days (notebook section 6.10). "
+                   "Where the intervals overlap a lot, the models cannot really be told apart.")
     with c2:
         st.dataframe(res[["group", "ROC_AUC", "balanced_acc", "F1", "accuracy"]].round(3), use_container_width=True, height=480)
 
@@ -353,7 +419,7 @@ with tab_models:
     cal = cal.groupby(["zone", "band"]).agg(predicted=("prob_soft_voting", "mean"), rained=("rained", "mean")).reset_index()
     fig = px.line(cal, x="predicted", y="rained", color="zone", markers=True, height=420,
                   category_orders={"zone": ["Wet", "Intermediate", "Dry"]},
-                  color_discrete_map={"Wet": "#1f77b4", "Intermediate": "#2ca02c", "Dry": "#d62728"},
+                  color_discrete_map=ZONE_COLORS,
                   labels={"predicted": "predicted chance of rain", "rained": "share of days it really rained"})
     fig.add_shape(type="line", x0=0, y0=0, x1=1, y1=1, line=dict(dash="dot", color="grey"))
     fig.update_layout(xaxis=dict(range=[0, 1], tickformat=".0%"), yaxis=dict(range=[0, 1], tickformat=".0%"),
@@ -384,18 +450,19 @@ with tab_test:
 
     left, right = st.columns([2, 3])
     with left, st.container(border=True):
-        st.markdown(f"**All test days in {city2}: what happened**")
-        outcome = pd.Series({
-            "Rain, predicted": int((d["rained"] & d["predicted"]).sum()),
-            "Dry, predicted": int((~d["rained"] & ~d["predicted"]).sum()),
-            "Rain missed": int((d["rained"] & ~d["predicted"]).sum()),
-            "False alarm": int((~d["rained"] & d["predicted"]).sum()),
-        })
-        fig = go.Figure(go.Pie(labels=outcome.index, values=outcome.values, hole=0.6, sort=False,
-                               marker_colors=["#1f77b4", "#2ca02c", "#ff7f0e", "#d62728"], textinfo="percent"))
-        fig.add_annotation(text=f"{acc:.0%}<br>correct", showarrow=False, font_size=18)
-        fig.update_layout(height=360, margin=dict(t=10, b=10), legend=dict(orientation="h", y=-0.05))
+        st.markdown(f"**Confusion matrix, all test days in {city2}**")
+        cm = np.array([[int((~d["rained"] & ~d["predicted"]).sum()), int((~d["rained"] & d["predicted"]).sum())],
+                       [int((d["rained"] & ~d["predicted"]).sum()), int((d["rained"] & d["predicted"]).sum())]])
+        share = cm / cm.sum(axis=1, keepdims=True)
+        labels = [["dry, predicted dry", "false alarm"], ["rain missed", "rain, predicted rain"]]
+        text = [[f"{cm[i, j]:,}<br>{share[i, j]:.0%}" for j in range(2)] for i in range(2)]
+        fig = go.Figure(go.Heatmap(z=share, x=["predicted: no rain", "predicted: rain"], y=["actual: no rain", "actual: rain"],
+                                   text=text, texttemplate="%{text}", textfont=dict(size=16), colorscale="Blues",
+                                   zmin=0, zmax=1, showscale=False, customdata=labels,
+                                   hovertemplate="%{customdata}: %{text}<extra></extra>"))
+        fig.update_layout(height=360, margin=dict(t=10, b=10), yaxis=dict(autorange="reversed"))
         st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+        st.caption("Number of days and the share of each actual class (row).")
     with right, st.container(border=True):
         st.markdown(f"**Correct days by month in {city2}**")
         mon = d.assign(ok=d["predicted"] == d["rained"], m=d["date"].dt.to_period("M").dt.to_timestamp())
@@ -407,15 +474,21 @@ with tab_test:
 
     months = st.slider("Months to show", 1, 35, 6)
     dd = d[d["date"] >= d["date"].max() - pd.DateOffset(months=months)]
-    fig = go.Figure()
-    fig.add_trace(go.Bar(x=dd["date"] + pd.Timedelta(days=1), y=dd["rain_tomorrow_mm"], name="actual rain (mm)",
-                         marker_color="#9ecae1", yaxis="y2"))
-    fig.add_trace(go.Scatter(x=dd["date"] + pd.Timedelta(days=1), y=dd["prob_soft_voting"], name="predicted chance",
-                             line=dict(color="#08519c")))
-    fig.add_hline(y=thr, line_dash="dot", annotation_text=f"cut-off {thr}")
-    fig.update_layout(height=420, yaxis=dict(title="chance of rain", range=[0, 1]),
-                      yaxis2=dict(title="rain (mm)", overlaying="y", side="right"), legend=dict(orientation="h", y=1.1),
-                      margin=dict(t=10))
+    # two panels on one shared time axis (not two y-axes on one plot)
+    when = dd["date"] + pd.Timedelta(days=1)
+    fig = make_subplots(rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.08, row_heights=[0.55, 0.45],
+                        subplot_titles=("Predicted chance of rain (dotted line: the zone's cut-off)",
+                                        "Rain that really fell (dotted line: 1 mm, a rain day)"))
+    fig.add_trace(go.Scatter(x=when, y=dd["prob_soft_voting"], name="predicted chance", line=dict(color="#2a78d6", width=2),
+                             hovertemplate="%{x|%d %b %Y}: %{y:.0%}<extra></extra>"), row=1, col=1)
+    fig.add_hline(y=thr, line_dash="dot", line_color="#9a9a94", annotation_text=f"cut-off {thr:.2f}",
+                  annotation_position="bottom left", row=1, col=1)
+    fig.add_trace(go.Bar(x=when, y=dd["rain_tomorrow_mm"], name="rain (mm)", marker_color="#2a78d6",
+                         hovertemplate="%{x|%d %b %Y}: %{y:.1f} mm<extra></extra>"), row=2, col=1)
+    fig.add_hline(y=1, line_dash="dot", line_color="#9a9a94", row=2, col=1)
+    fig.update_yaxes(range=[0, 1], tickformat=".0%", row=1, col=1)
+    fig.update_yaxes(title_text="mm", row=2, col=1)
+    fig.update_layout(height=520, showlegend=False, margin=dict(t=30))
     st.plotly_chart(fig, use_container_width=True)
     st.caption("These predictions come from the models trained only on 2010 to 2021, so this is a fair test.")
 
