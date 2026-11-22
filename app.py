@@ -81,9 +81,6 @@ ICON_PATHS = {
                '<path d="M16 19v1"/><path d="M16 14v1"/><path d="M12 21v1"/><path d="M12 16v1"/>',
     "rain": '<path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M16 14v6"/><path d="M8 14v6"/>'
             '<path d="M12 16v6"/>',
-    "moon": '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>',
-    "monitor": '<rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/>'
-               '<line x1="12" x2="12" y1="17" y2="21"/>',
     "play": '<polygon points="6 3 20 12 6 21 6 3"/>',
     "pause": '<rect x="14" y="4" width="4" height="16" rx="1"/><rect x="6" y="4" width="4" height="16" rx="1"/>',
 }
@@ -224,36 +221,8 @@ actual = history[history["date"] == next_day].set_index("city")["precipitation_s
 
 st.sidebar.markdown("---")
 st.sidebar.caption("Weather data by [Open-Meteo.com](https://open-meteo.com/) (CC BY 4.0), ERA5 by ECMWF / Copernicus.")
-with st.sidebar:
-    components.html("""
-<style>
-  body { margin: 0; font-family: "Source Sans Pro", sans-serif; }
-  .t { display: flex; gap: 4px; border: 1px solid rgba(128,128,128,.35); border-radius: 8px; padding: 3px; width: fit-content; }
-  .t button { display: inline-flex; border: 0; background: transparent; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
-  .t button:hover { background: rgba(128,128,128,.2); }
-  .t button.on { background: rgba(31,119,180,.25); }
-</style>
-<div class="t">
-  <button id="Light" title="Light mode">SUN</button>
-  <button id="Dark" title="Dark mode">MOON</button>
-  <button id="Use system setting" title="Same as my computer">MONITOR</button>
-</div>
-<script>
-  const key = "stActiveTheme-" + window.parent.location.pathname + "-v1";
-  let saved = null;
-  try { saved = window.parent.localStorage.getItem(key); } catch (e) {}
-  if (!saved) {            // first visit: start in light mode
-    try { window.parent.localStorage.setItem(key, JSON.stringify({name: "Light"})); window.parent.location.reload(); } catch (e) {}
-  }
-  let now = "Light";
-  try { now = JSON.parse(saved || "{}").name || now; } catch (e) {}
-  document.querySelectorAll(".t button").forEach(b => {
-    if (b.id === now) b.classList.add("on");
-    b.onclick = () => { window.parent.localStorage.setItem(key, JSON.stringify({name: b.id})); window.parent.location.reload(); };
-  });
-</script>
-""".replace("SUN", icon("sun", 18, "#868e96")).replace("MOON", icon("moon", 18, "#868e96"))
-       .replace("MONITOR", icon("monitor", 18, "#868e96")), height=48)
+st.sidebar.caption("Light mode is the default. For dark mode, open the menu at the top right, then Settings, "
+                   "then choose the app theme.")
 
 tab_map, tab_models, tab_why, tab_test, tab_about = st.tabs(
     ["Tomorrow", "Model comparison", "Why this prediction?", "Test years (2024 to 2026)", "About"])

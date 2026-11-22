@@ -1,2 +1,6 @@
 [browser]
 gatherUsageStats = false
+
+[theme]
+# open in light mode; viewers can switch to dark in the app menu (top right, Settings) without a page reload
+base = "light"

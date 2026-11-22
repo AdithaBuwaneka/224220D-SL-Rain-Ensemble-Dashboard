@@ -4,6 +4,8 @@ Will it rain tomorrow in a Sri Lankan city? This project predicts next-day rain 
 wet, intermediate and dry zones, compares bagging, boosting, stacking, voting and hybrid models, explains the
 predictions with SHAP, and shows everything in a Streamlit dashboard with live weather.
 
+**Live app: [sl-rain-tomorrow.streamlit.app](https://sl-rain-tomorrow.streamlit.app)**
+
 CM3720 Machine Learning & Pattern Recognition hands-on project by Wimalasuriya A.G.A.B. (224220D)
 
 ![Architecture](images/architecture.png)
@@ -18,9 +20,7 @@ CM3720 Machine Learning & Pattern Recognition hands-on project by Wimalasuriya A
   whether the chance of rain can be trusted
 - **Why this prediction?:** SHAP explanation for any city, and the features that matter most in each zone
 - **Test years:** confusion matrix and day-by-day results for each city in 2024 to 2026
-- Opens in light mode; dark mode and the computer's own setting can be chosen with the buttons in the sidebar
-
-Live app: *(link added after deployment)*
+- Opens in light mode; dark mode can be chosen in the app menu (top right, Settings) without reloading the page
 
 ## Data
 
