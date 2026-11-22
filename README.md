@@ -8,7 +8,9 @@ predictions with SHAP, and shows everything in a Streamlit dashboard with live w
 
 CM3720 Machine Learning & Pattern Recognition hands-on project by Wimalasuriya A.G.A.B. (224220D)
 
-![Architecture](images/architecture.png)
+## System architecture
+
+![System architecture](images/architecture.png)
 
 ## Dashboard
 
