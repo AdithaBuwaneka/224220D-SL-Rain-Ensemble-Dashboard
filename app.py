@@ -210,8 +210,13 @@ with st.sidebar:
 </div>
 <script>
   const key = "stActiveTheme-" + window.parent.location.pathname + "-v1";
-  let now = "Use system setting";
-  try { now = JSON.parse(window.parent.localStorage.getItem(key) || "{}").name || now; } catch (e) {}
+  let saved = null;
+  try { saved = window.parent.localStorage.getItem(key); } catch (e) {}
+  if (!saved) {            // first visit: start in light mode
+    try { window.parent.localStorage.setItem(key, JSON.stringify({name: "Light"})); window.parent.location.reload(); } catch (e) {}
+  }
+  let now = "Light";
+  try { now = JSON.parse(saved || "{}").name || now; } catch (e) {}
   document.querySelectorAll(".t button").forEach(b => {
     if (b.id === now) b.classList.add("on");
     b.onclick = () => { window.parent.localStorage.setItem(key, JSON.stringify({name: b.id})); window.parent.location.reload(); };
@@ -322,8 +327,8 @@ with tab_models:
     c1, c2 = st.columns([3, 2])
     with c1:
         fig = px.bar(res.reset_index(), x="ROC_AUC", y="index", color="group", orientation="h", height=480,
-                     range_x=[0.5, 0.92], labels={"index": "", "ROC_AUC": "ROC-AUC"}, text="ROC_AUC")
-        fig.update_traces(texttemplate="%{text:.3f}", textposition="outside")
+                     range_x=[0.5, 0.95], labels={"index": "", "ROC_AUC": "ROC-AUC"}, text="ROC_AUC")
+        fig.update_traces(texttemplate="%{text:.3f}", textposition="outside", cliponaxis=False)
         fig.update_layout(yaxis=dict(autorange="reversed"), margin=dict(t=10))
         st.plotly_chart(fig, use_container_width=True)
     with c2:
@@ -341,6 +346,21 @@ with tab_models:
     fig = px.imshow(sz.round(3), text_auto=True, color_continuous_scale="Blues", aspect="auto", height=300)
     fig.update_layout(margin=dict(t=10))
     st.plotly_chart(fig, use_container_width=True)
+
+    st.subheader("Can the chance of rain be trusted? (soft voting)")
+    cal = tp_all.assign(rained=tp_all["rain_tomorrow_mm"] >= 1)
+    cal["band"] = cal.groupby("zone")["prob_soft_voting"].transform(lambda p: pd.qcut(p, 10, labels=False, duplicates="drop"))
+    cal = cal.groupby(["zone", "band"]).agg(predicted=("prob_soft_voting", "mean"), rained=("rained", "mean")).reset_index()
+    fig = px.line(cal, x="predicted", y="rained", color="zone", markers=True, height=420,
+                  category_orders={"zone": ["Wet", "Intermediate", "Dry"]},
+                  color_discrete_map={"Wet": "#1f77b4", "Intermediate": "#2ca02c", "Dry": "#d62728"},
+                  labels={"predicted": "predicted chance of rain", "rained": "share of days it really rained"})
+    fig.add_shape(type="line", x0=0, y0=0, x1=1, y1=1, line=dict(dash="dot", color="grey"))
+    fig.update_layout(xaxis=dict(range=[0, 1], tickformat=".0%"), yaxis=dict(range=[0, 1], tickformat=".0%"),
+                      margin=dict(t=10))
+    st.plotly_chart(fig, use_container_width=True)
+    st.caption("The test days of each zone are split into 10 groups by predicted chance. Points close to the dotted "
+               "line mean the chance shown on the map can be trusted.")
 
     st.subheader("Rainfall amount (regression): Random Forest + ANN")
     st.dataframe(pd.DataFrame(info["regression_results"]).T.round(3), use_container_width=True)
@@ -413,10 +433,11 @@ page uses the Open-Meteo forecast API (last 60 days + today), so its values come
 ARIMA + Random Forest, and a Random Forest + ANN hybrid for the rainfall amount. Full details, results and the
 discussion are in the notebook in the GitHub repository.
 
-**AI-use declaration:** AI tools (Claude) were used to write the Python code and its comments and this Streamlit dashboard, and to help
-write my sections in clear English from my own points and decisions. The project idea, the choice of data and
-cities, the planning, the modelling decisions, and the plan and Excalidraw-style look of the architecture diagram
-are my own (the AI wrote the code that draws the diagram).
+**AI-use declaration:** AI tools (Claude) were used to write all of the code and its comments (the notebook, this Streamlit dashboard and
+the scripts that draw the charts and images), and to help with the wording of my written sections (the points and
+decisions in them are my own). The project idea, the choice of data and cities, the planning, the modelling decisions, and the
+plan and Excalidraw-style look of the architecture diagram are my own. I reviewed the code and the results,
+and I take responsibility for the submitted work.
 
 Wimalasuriya A.G.A.B. (224220D), CM3720 Machine Learning & Pattern Recognition
 """)
