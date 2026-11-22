@@ -96,12 +96,42 @@ requirements.txt
 
 ## Run it
 
+Tested with **Python 3.13** on Windows. Keep the package versions in `requirements.txt`: the saved models only load
+with the same scikit-learn, XGBoost, LightGBM and CatBoost versions they were saved with.
+
+**1. Get the code and install the packages**
+
 ```bash
+git clone https://github.com/AdithaBuwaneka/224220D-SL-Rain-Ensemble-Dashboard.git
+cd 224220D-SL-Rain-Ensemble-Dashboard
+python -m venv .venv
+.venv\Scripts\activate             # Windows
+# source .venv/bin/activate        # macOS / Linux
 pip install -r requirements.txt
+```
+
+**2. Run the dashboard**
+
+```bash
 streamlit run app.py
 ```
 
-To download the data again: `python src/download_data.py`. To retrain, run the notebook from top to bottom.
+It opens at http://localhost:8501. Live mode gets today's weather from Open-Meteo (internet needed, no API key).
+Without internet the dashboard uses the last day in the saved ERA5 data instead.
+
+**3. Run the notebook (optional, retrains everything)**
+
+```bash
+pip install notebook
+jupyter notebook 224220D_Wimalasuriya_AGAB_SL_Rain_Ensemble.ipynb
+```
+
+Then choose Kernel, Restart & Run All (or Run All in VS Code with the Jupyter extension). It takes about 15 minutes
+on a laptop CPU. It reads `data/raw/` and writes the models to `models/`, the charts to `images/` and the test-year
+predictions to `data/processed/`, which the dashboard then uses.
+
+**Download the data again (optional):** `python src/download_data.py` gets the same ERA5 data from the Open-Meteo
+Historical Weather API and saves it to `data/raw/`.
 
 ## AI-use declaration
 
