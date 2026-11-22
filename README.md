@@ -14,10 +14,10 @@ CM3720 Machine Learning & Pattern Recognition hands-on project by Wimalasuriya A
 
 - **Tomorrow:** chance of rain for every city on an OpenStreetMap weather map (press Play to see the last 7 days),
   chance by city with each zone's cut-off, and the expected amount of rain
-- **Model comparison:** all models on the test years, by zone and by monsoon season, and whether the chance of
-  rain can be trusted
-- **Why this prediction?:** SHAP explanation for any city
-- **Test years:** how the model did day by day in 2024 to 2026
+- **Model comparison:** all models on the test years with 95% intervals, by zone and by monsoon season, and
+  whether the chance of rain can be trusted
+- **Why this prediction?:** SHAP explanation for any city, and the features that matter most in each zone
+- **Test years:** confusion matrix and day-by-day results for each city in 2024 to 2026
 - Opens in light mode; dark mode and the computer's own setting can be chosen with the buttons in the sidebar
 
 Live app: *(link added after deployment)*
@@ -43,6 +43,11 @@ Weather data by Open-Meteo.com, licensed under CC BY 4.0.
 - **Models:** decision tree, bagging, Random Forest, AdaBoost, XGBoost, LightGBM, CatBoost, soft voting, stacking,
   ARIMA + Random Forest hybrid, and Random Forest + ANN for the amount of rain.
 - **Baselines:** climatology (the usual chance for that city) and persistence (tomorrow = today).
+- **Tuning:** a grid search for each model, scored on the validation years (not k-fold, which would mix days
+  from different years). The values tried and the reason for each are in the notebook (5.2), with checks for
+  overfitting and ccp_alpha pruning of the decision tree.
+- **Evaluation:** ROC-AUC, balanced accuracy, F1, precision and recall (classification report), confusion
+  matrices, calibration, bootstrap intervals, and results by zone, season and year.
 
 ## Results (test years 2024 to Nov 2026)
 
@@ -50,23 +55,23 @@ Weather data by Open-Meteo.com, licensed under CC BY 4.0.
 |---|---|---|---|
 | Baseline: climatology | 0.713 | 0.641 | 0.745 |
 | Baseline: persistence | 0.782 | 0.782 | 0.834 |
-| Decision tree | 0.868 | 0.785 | 0.840 |
-| Random Forest (bagging) | 0.886 | 0.792 | 0.851 |
-| XGBoost (boosting) | 0.888 | 0.794 | 0.851 |
-| CatBoost (boosting) | 0.889 | 0.794 | 0.851 |
-| Stacking | 0.889 | 0.790 | 0.855 |
-| **Soft voting** | **0.889** | 0.797 | 0.854 |
-| Hybrid: ARIMA + RF | 0.888 | **0.802** | 0.854 |
+| Decision tree | 0.875 | 0.779 | 0.839 |
+| Random Forest (bagging) | 0.886 | 0.792 | 0.852 |
+| XGBoost (boosting) | 0.888 | 0.796 | 0.851 |
+| **CatBoost (boosting)** | **0.890** | 0.796 | 0.853 |
+| Stacking | 0.889 | 0.789 | **0.854** |
+| Soft voting (used in the dashboard) | 0.889 | 0.797 | **0.854** |
+| Hybrid: ARIMA + RF | 0.888 | **0.800** | **0.854** |
 
 Rain amount: Random Forest + ANN gave the lowest error (MAE 4.34 mm, R² 0.33), compared with 5.33 mm for persistence.
 
 Main findings:
 
 - Every ensemble beats the simple baselines and a single tree, but the differences between the ensembles are small.
-  A bootstrap of the test days (1,000 resamples) shows that CatBoost, XGBoost, stacking and the ARIMA + RF hybrid
-  cannot be told apart from soft voting.
-- The chances given by soft voting match how often it really rained (lowest Brier score, 0.130), so the dashboard
-  shows them as they are. Stacking was over-confident at high chances.
+  A bootstrap of the test days (1,000 resamples) shows that CatBoost, XGBoost and stacking cannot be told apart
+  from soft voting.
+- The chances given by soft voting match how often it really rained (lowest Brier score, 0.130, tied with
+  CatBoost), so the dashboard shows them as they are. Stacking was over-confident at high chances.
 - The wet zone is the easiest to predict and the dry zone in the first inter-monsoon is the hardest. With the zone
   cut-offs, the intermediate zone missed the most rain days (31%).
 - Choosing the cut-off for each zone raised the wet zone's balanced accuracy from 0.72 to 0.80.
