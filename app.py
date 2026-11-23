@@ -15,6 +15,21 @@ import streamlit.components.v1 as components
 from src.predict import CLASSIFIERS, fetch_live, load_era5_history, load_models, predict
 
 st.set_page_config(page_title="Sri Lanka rain tomorrow", page_icon=":material/rainy:", layout="wide")
+st.markdown("""
+<style>
+  /* narrower sidebar: it only holds the weather data choice and the theme buttons */
+  section[data-testid="stSidebar"][aria-expanded="true"] { width: 260px !important; min-width: 260px !important; }
+  /* the tab bar stays at the top while the page scrolls (just below Streamlit's 60 px header) */
+  /* the tab bar sits in the top row (where the empty header space was) and stays there while scrolling */
+  header[data-testid="stHeader"] { background: transparent !important; pointer-events: none; }
+  header[data-testid="stHeader"] button, header[data-testid="stHeader"] a,
+  header[data-testid="stHeader"] [data-testid="stToolbar"] { pointer-events: auto; }
+  [data-testid="stMainBlockContainer"] { padding-top: 10px !important; }
+  div:has(> [data-baseweb="tab-list"]) { position: sticky; top: 0; z-index: 999989; padding-top: 10px;
+                                         box-shadow: 0 1px 0 rgba(128,128,128,.28); }
+  header[data-testid="stHeader"] { z-index: 999990 !important; }   /* menu buttons stay above the tab bar */
+</style>
+""", unsafe_allow_html=True)
 # colours checked for colour-blind readers in light and dark mode (same set as the notebook)
 ZONE_COLORS = {"Wet": "#2a78d6", "Intermediate": "#199e70", "Dry": "#d95926"}
 FAMILY = {"Baseline": "Baseline or single tree", "Single tree": "Baseline or single tree", "Bagging": "Bagging",
@@ -48,24 +63,35 @@ def nice(name):
 MODEL_COLS = CLASSIFIERS + ["Soft voting", "Hybrid: ARIMA + RF"]
 
 
-@st.cache_resource
+@st.cache_resource(show_spinner=False)
 def get_models():
     return load_models()
 
 
-@st.cache_data(ttl=3600, show_spinner="Getting today's weather from Open-Meteo ...")
+@st.cache_data(ttl=3600, show_spinner=False)
 def get_live(_info):
     return fetch_live(_info)
 
 
-@st.cache_data
+@st.cache_data(show_spinner=False)
 def get_era5():
     return load_era5_history()
 
 
-@st.cache_data
+@st.cache_data(show_spinner=False)
 def get_test_predictions():
     return pd.read_csv("data/processed/test_predictions.csv", parse_dates=["date"])
+
+
+@st.cache_data(ttl=3600, show_spinner=False)
+def get_prediction(_history, _info, _models, day, source_key):
+    """Prediction for one day; cached, so changing the city or the tab does not recompute it."""
+    return predict(_history, _info, _models, day)
+
+
+@st.cache_resource(show_spinner=False)
+def get_explainer(_model):
+    return shap.TreeExplainer(_model)
 
 
 # Lucide icons (MIT licence, lucide.dev), drawn as inline SVG
@@ -81,6 +107,9 @@ ICON_PATHS = {
                '<path d="M16 19v1"/><path d="M16 14v1"/><path d="M12 21v1"/><path d="M12 16v1"/>',
     "rain": '<path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M16 14v6"/><path d="M8 14v6"/>'
             '<path d="M12 16v6"/>',
+    "moon": '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>',
+    "monitor": '<rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/>'
+               '<line x1="12" x2="12" y1="17" y2="21"/>',
     "play": '<polygon points="6 3 20 12 6 21 6 3"/>',
     "pause": '<rect x="14" y="4" width="4" height="16" rx="1"/><rect x="6" y="4" width="4" height="16" rx="1"/>',
 }
@@ -187,7 +216,8 @@ show(D.frames.length - 1);
         .replace("PAUSE_JSON", json.dumps(pause_html))
 
 
-info, models = get_models()
+with st.sidebar, st.spinner("Loading the models ..."):
+    info, models = get_models()
 
 # ---------------------------------------------------------------- data for the prediction
 st.sidebar.title("Sri Lanka rain tomorrow")
@@ -199,7 +229,8 @@ source = st.sidebar.radio("Weather data", ["Live (Open-Meteo, today)", "Past day
 live_failed = False
 if source.startswith("Live"):
     try:
-        history = get_live(info)
+        with st.sidebar, st.spinner("Getting today's weather from Open-Meteo ..."):
+            history = get_live(info)
         today = pd.Timestamp.now(tz="Asia/Colombo").normalize().tz_localize(None)
         day = today if today in set(history["date"]) else history["date"].max() - pd.Timedelta(days=1)
         note = (f"Weather up to **{day.date()}** (today's values include the forecast for the rest of the day). "
@@ -208,7 +239,8 @@ if source.startswith("Live"):
         live_failed = True
         st.sidebar.warning(f"Live data not available ({type(e).__name__}). Showing the last ERA5 day instead.")
 if not source.startswith("Live") or live_failed:
-    history = get_era5()
+    with st.sidebar, st.spinner("Loading the saved ERA5 data ..."):
+        history = get_era5()
     last = history["date"].max() - pd.Timedelta(days=1)
     day = pd.Timestamp(st.sidebar.date_input("Day (weather up to this day)", value=last.date(),
                                              min_value=pd.Timestamp("2010-01-08").date(), max_value=last.date()))
@@ -217,21 +249,94 @@ if not source.startswith("Live") or live_failed:
 
 # one city for every tab that shows a single city (instead of a separate city box in each tab)
 CITY_LIST = sorted(info["cities"])
-city = st.sidebar.selectbox("City", CITY_LIST, index=CITY_LIST.index("Colombo"),
-                            help="Changes the Why this prediction? and Test years tabs, and is marked on the Tomorrow tab.")
+st.session_state.setdefault("city", "Colombo")          # one city shared by the Why and Test years tabs
+
+
+def city_picker(key):
+    """City dropdown placed in a tab; every copy shows and changes the same shared city."""
+    st.session_state[key] = st.session_state["city"]
+    return st.selectbox("City", CITY_LIST, key=key,
+                        on_change=lambda: st.session_state.update(city=st.session_state[key]))
+
+
+city = st.session_state["city"]
 
 is_live = source.startswith("Live") and not live_failed
 loaded_at = pd.Timestamp.now(tz="Asia/Colombo").strftime("%d %b %Y, %H:%M") + " (Sri Lanka time)"
-pred, X = predict(history, info, models, day)
+with st.sidebar, st.spinner("Updating the prediction ..."):     # in the sidebar, so the tabs keep their place
+    pred, X = get_prediction(history, info, models, day, ("live" if is_live else "era5", str(day.date())))
 next_day = day + pd.Timedelta(days=1)
 actual = history[history["date"] == next_day].set_index("city")["precipitation_sum"]
 
-st.sidebar.markdown("---")
-st.sidebar.caption("Weather data by [Open-Meteo.com](https://open-meteo.com/) (CC BY 4.0), ERA5 by ECMWF / Copernicus.")
-st.sidebar.caption("To hide this panel and widen the charts, use the small button at its top right "
-                   "(it shows when the mouse is over the panel).")
-st.sidebar.caption("Light mode is the default. For dark mode, open the menu at the top right, then Settings, "
-                   "then choose the app theme.")
+THEME_BUTTONS = """
+<style>
+  body { margin: 0; font-family: "Source Sans Pro", sans-serif; }
+  .t { display: flex; gap: 4px; border: 1px solid rgba(128,128,128,.35); border-radius: 8px; padding: 3px; width: fit-content; }
+  .t button { display: inline-flex; border: 0; background: transparent; padding: 6px 14px; border-radius: 6px; cursor: pointer; }
+  .t button:hover { background: rgba(128,128,128,.2); }
+  .t button.on { background: rgba(42,120,214,.22); }
+</style>
+<div class="t">
+  <button data-name="Light" title="Light mode" aria-label="Light mode">SUN</button>
+  <button data-name="Dark" title="Dark mode" aria-label="Dark mode">MOON</button>
+  <button data-name="Use system setting" title="Same as my computer" aria-label="Same as my computer">MONITOR</button>
+</div>
+<script>
+  // The buttons use Streamlit's own theme setting (menu, Settings, theme), so the theme changes with no page reload.
+  const P = window.parent, D = P.document;
+  const key = "stActiveTheme-" + P.location.pathname + "-v1";
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  async function waitFor(find, ms = 3000) {
+    for (const end = Date.now() + ms; Date.now() < end; await sleep(40)) { const x = find(); if (x) return x; }
+    return null;
+  }
+  const mine = "sl-rain-theme";                        // remembers which button was clicked last
+  function active() {
+    try { const m = P.localStorage.getItem(mine); if (m) return m; } catch (e) {}
+    return "Light";                                     // the light default comes from config.toml
+  }
+  function mark() { document.querySelectorAll(".t button").forEach(b => b.classList.toggle("on", b.dataset.name === active())); }
+  async function setTheme(name) {
+    const hide = D.createElement("style");              // keep the menu and dialog invisible while they are used
+    hide.textContent = '[data-baseweb="popover"], [role="dialog"], [data-baseweb="modal"] { opacity: 0 !important; }';
+    D.head.appendChild(hide);
+    try {
+      const menu = D.querySelector('[data-testid="stMainMenu"] button') || D.querySelector('[data-testid="stMainMenu"]');
+      menu.click();
+      const item = await waitFor(() => [...D.querySelectorAll('li, [role="menuitem"]')].find(e => e.innerText.trim() === "Settings"));
+      item.click();
+      const dlg = await waitFor(() => D.querySelector('[role="dialog"]'));
+      const select = await waitFor(() => dlg.querySelector('[data-baseweb="select"] div'));
+      select.click();
+      const opt = await waitFor(() => [...D.querySelectorAll('[role="option"]')].find(o => o.innerText.trim() === name));
+      opt.click();
+      try { P.localStorage.setItem(mine, name); } catch (e) {}
+      await sleep(120);
+      const close = await waitFor(() => D.querySelector('[role="dialog"] [aria-label="Close"]'), 1000);
+      if (close) close.click();
+    } catch (e) {
+      console.warn("theme switch failed", e);
+    } finally {
+      setTimeout(() => hide.remove(), 400);
+      setTimeout(mark, 200);
+    }
+  }
+  document.querySelectorAll(".t button").forEach(b => b.onclick = () => setTheme(b.dataset.name));
+  mark();
+  // the sticky tab bar needs the page colour behind it (white in light mode, dark in dark mode)
+  setInterval(() => {
+    const app = D.querySelector('[data-testid="stApp"]'), bar = D.querySelector('div:has(> [data-baseweb="tab-list"])');
+    if (app && bar) bar.style.backgroundColor = P.getComputedStyle(app).backgroundColor;
+  }, 300);
+</script>
+""".replace("SUN", icon("sun", 18, "#868e96")).replace("MOON", icon("moon", 18, "#868e96")) \
+   .replace("MONITOR", icon("monitor", 18, "#868e96"))
+
+with st.sidebar:
+    st.markdown("<p style='font-size:14px;margin:0 0 4px'>Theme</p>", unsafe_allow_html=True)
+    components.html(THEME_BUTTONS, height=46)
+    st.markdown("---")
+    st.caption("Data: [Open-Meteo.com](https://open-meteo.com/) (CC BY 4.0), ERA5 by ECMWF / Copernicus.")
 
 tab_map, tab_models, tab_why, tab_test, tab_about = st.tabs(
     ["Tomorrow", "Model comparison", "Why this prediction?", "Test years (2024 to 2026)", "About"])
@@ -249,8 +354,9 @@ with tab_map:
     k = st.columns(3)
     k[0].metric("Cities with rain tomorrow", f"{n_rain} of {len(pred)}", border=True,
                 help=f"Rain = 1 mm or more, decided with each zone's cut-off. Rain expected in: {rain_cities}")
-    k[1].metric("Highest chance of rain", f"{top_city} ({pred.loc[top_city, 'Soft voting']:.0%})", border=True)
-    k[2].metric("Most rain expected", f"{wet_city} ({pred.loc[wet_city, 'expected_mm']:.1f} mm)", border=True,
+    k[1].metric(f"Highest chance of rain: {top_city}", f"{pred.loc[top_city, 'Soft voting']:.0%}", border=True,
+                help="Soft voting (Random Forest, XGBoost, LightGBM, CatBoost)")
+    k[2].metric(f"Most rain expected: {wet_city}", f"{pred.loc[wet_city, 'expected_mm']:.1f} mm", border=True,
                 help="Random Forest + ANN hybrid")
 
     # 2. the picture: weather map + chance by city
@@ -262,7 +368,7 @@ with tab_map:
     with right, st.container(border=True):
         st.markdown("**Chance of rain by city**")
         st.caption("Bar colour = zone. The grey tick is the zone's cut-off for saying 'rain'. "
-                   "The city chosen in the sidebar is in bold.")
+                   "The city picked on the Why and Test years tabs is in bold.")
         b = pred.sort_values("Soft voting")
         fig = go.Figure(go.Bar(x=b["Soft voting"] * 100, y=b.index, orientation="h",
                                marker_color=[ZONE_COLORS[z] for z in b["zone"]],
@@ -311,11 +417,14 @@ with tab_map:
 # ---------------------------------------------------------------- tab 2: SHAP
 with tab_why:
     st.header("Why this prediction?")
-    st.caption("City and weather data are chosen in the sidebar.")
-    st.markdown(f"**{city}** ({pred.loc[city, 'zone']} zone): CatBoost gives a "
-                f"**{pred.loc[city, 'CatBoost']:.0%}** chance of rain on {next_day.date()}.")
-    explainer = shap.TreeExplainer(models["CatBoost"])
-    sv = explainer(X.loc[[city]])
+    c_city, _ = st.columns([1, 2])
+    with c_city:
+        city = city_picker("city_why")
+    st.markdown(f"**{city}** ({pred.loc[city, 'zone']} zone), {next_day.date()}: the dashboard's chance of rain is "
+                f"**{pred.loc[city, 'Soft voting']:.0%}** (soft voting, the average of four models). The chart explains "
+                f"**CatBoost**, one of those four models, which gives **{pred.loc[city, 'CatBoost']:.0%}**.")
+    with st.spinner(f"Explaining the prediction for {city} ..."):
+        sv = get_explainer(models["CatBoost"])(X.loc[[city]])
     sv.feature_names = [nice(f) for f in X.columns]
     left, right = st.columns([3, 2])
     with left, st.container(border=True):
@@ -324,17 +433,19 @@ with tab_why:
         shap.plots.waterfall(sv[0], max_display=12, show=False)
         plt.gcf().set_size_inches(6.4, 6.2)        # SHAP sets a wide figure; a narrower one keeps the text readable here
         st.pyplot(plt.gcf(), clear_figure=True)
-        st.caption("Red bars push the chance of rain up, blue bars push it down (SHAP values, in log-odds). "
-                   "The number before each name is today's value. E[f(X)] is the average prediction and f(x) is "
-                   "this prediction.")
+        st.caption("Read it from the bottom up: the model starts from its usual answer (E[f(X)]) and each bar shows "
+                   "how much one feature moved it. Red bars push the chance of rain up, blue bars push it down. "
+                   "The number before each name is today's value. f(x) is the final answer, on the model's internal "
+                   "(log-odds) scale.")
     with right, st.container(border=True):
         st.markdown("**What matters most in each zone (test years)**")
         imp = pd.DataFrame(info["shap_by_zone"])[["Wet", "Intermediate", "Dry"]] * 100
         imp.index = [nice(f) for f in imp.index]
-        fig = px.imshow(imp.round(1), text_auto=".1f", color_continuous_scale="Blues", aspect="auto", height=520,
+        fig = px.imshow(imp.round(1), text_auto=".1f", color_continuous_scale="Blues", aspect="auto",
+                        height=40 + 28 * len(imp),
                         labels=dict(x="", y="", color="share (%)"))
         fig.update_traces(hovertemplate="%{y}, %{x} zone: %{z:.1f}%<extra></extra>")
-        fig.update_layout(margin=dict(t=10), coloraxis_showscale=False)
+        fig.update_layout(margin=dict(t=10, b=10), coloraxis_showscale=False)
         st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
         st.caption("Share of the total SHAP importance (%) for each feature, by zone. City, zone and season columns "
                    "are added together.")
@@ -342,6 +453,9 @@ with tab_why:
 # ---------------------------------------------------------------- tab 3: model comparison
 with tab_models:
     st.header("Model comparison (test years 2024 to Nov 2026)")
+    st.caption("All scores are on days the models never saw in training. ROC-AUC shows how well a model ranks rain days "
+               "above dry days: 1.0 is perfect and 0.5 is no better than guessing. Balanced accuracy is the average of "
+               "the share of rain days and the share of dry days predicted correctly.")
     res = pd.DataFrame(info["test_results"]).T
     num = ["accuracy", "balanced_acc", "F1", "ROC_AUC", "Brier"]
     res[num] = res[num].apply(pd.to_numeric)      # the group column made every column text; scores must be numbers
@@ -380,20 +494,31 @@ with tab_models:
         st.caption("Intervals come from 1,000 resamples of the test days (notebook section 6.10). "
                    "Where the intervals overlap a lot, the models cannot really be told apart.")
     with c2:
-        st.dataframe(res[["group", "ROC_AUC", "balanced_acc", "F1", "accuracy"]].round(3), use_container_width=True, height=480)
+        table = res[["ROC_AUC", "balanced_acc", "F1"]].rename(columns={   # family is shown by the dot colours
+            "ROC_AUC": "ROC-AUC", "balanced_acc": "Balanced acc.", "F1": "F1"})
+        st.dataframe(table, use_container_width=True, height=480,
+                     column_config={c: st.column_config.NumberColumn(format="%.3f") for c in ["ROC-AUC", "Balanced acc.", "F1"]})
 
     st.subheader("By zone")
     bz = pd.DataFrame(info["test_by_zone"])
     piv = bz.pivot(index="model", columns="zone", values="ROC_AUC")[["Wet", "Intermediate", "Dry"]]
-    fig = px.imshow(piv.round(3), text_auto=True, color_continuous_scale="Blues", aspect="auto", height=420)
+    piv = piv.loc[[m for m in res.index if m in piv.index]]          # best model first, as in the chart above
+    fig = px.imshow(piv.round(3), text_auto=".3f", color_continuous_scale="Blues", aspect="auto", height=420,
+                    labels=dict(x="", y="", color="ROC-AUC"))
+    fig.update_traces(hovertemplate="%{y}, %{x} zone: %{z:.3f}<extra></extra>")
     fig.update_layout(margin=dict(t=10))
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+    st.caption("ROC-AUC for each zone. The wet zone is the easiest to predict.")
 
     st.subheader("By monsoon season and zone (soft voting, ROC-AUC)")
     sz = pd.DataFrame(info["test_by_season_zone"])[["Wet", "Intermediate", "Dry"]]
-    fig = px.imshow(sz.round(3), text_auto=True, color_continuous_scale="Blues", aspect="auto", height=300)
+    fig = px.imshow(sz.round(3), text_auto=".3f", color_continuous_scale="Blues", aspect="auto", height=300,
+                    labels=dict(x="", y="", color="ROC-AUC"))
+    fig.update_traces(hovertemplate="%{y}, %{x} zone: %{z:.3f}<extra></extra>")
     fig.update_layout(margin=dict(t=10))
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+    st.caption("The lightest cell is the hardest case: the dry zone in the first inter-monsoon, when rain comes from "
+               "sudden thunderstorms.")
 
     st.subheader("Can the chance of rain be trusted? (soft voting)")
     cal = tp_all.assign(rained=tp_all["rain_tomorrow_mm"] >= 1)
@@ -410,15 +535,21 @@ with tab_models:
     st.caption("The test days of each zone are split into 10 groups by predicted chance. Points close to the dotted "
                "line mean the chance shown on the map can be trusted.")
 
-    st.subheader("Rainfall amount (regression): Random Forest + ANN")
-    st.dataframe(pd.DataFrame(info["regression_results"]).T.round(3), use_container_width=True)
+    st.subheader("How much rain? (Random Forest + ANN)")
+    reg = pd.DataFrame(info["regression_results"]).T.rename(columns={"MAE (mm)": "Average error (mm)",
+                                                                     "RMSE (mm)": "RMSE (mm)", "R2": "R²"})
+    st.dataframe(reg, use_container_width=True,
+                 column_config={c: st.column_config.NumberColumn(format="%.3f") for c in reg.columns})
+    st.caption("Average error is how far the predicted amount is from the real amount, in mm (lower is better). "
+               "The RF + ANN hybrid has the lowest error.")
 
 # ---------------------------------------------------------------- tab 4: test years
 with tab_test:
     st.header("How the model did in the test years")
     tp = get_test_predictions()
-    city2 = city                                   # the city chosen in the sidebar
-    st.caption(f"Showing {city2}. The city is chosen in the sidebar.")
+    c_city, _ = st.columns([1, 2])
+    with c_city:
+        city2 = city_picker("city_test")
     d = tp[tp["city"] == city2].copy()
     thr = info["zone_threshold"][d["zone"].iloc[0]]
     d["predicted"] = d["prob_soft_voting"] >= thr
