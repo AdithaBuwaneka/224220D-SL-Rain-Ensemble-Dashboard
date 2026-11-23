@@ -8,6 +8,8 @@ predictions with SHAP, and shows everything in a Streamlit dashboard with live w
 
 **Notebook in Google Colab: [open the notebook](https://colab.research.google.com/github/AdithaBuwaneka/224220D-SL-Rain-Ensemble-Dashboard/blob/main/224220D_Wimalasuriya_AGAB_SL_Rain_Ensemble.ipynb)**
 
+**Video (3 minutes): [watch the video](https://drive.google.com/file/d/1j3-_g3aZ0d8X2SRf98wrZCUvI_UScTex/view?usp=sharing)**
+
 CM3720 Machine Learning & Pattern Recognition hands-on project by Wimalasuriya A.G.A.B. (224220D)
 
 ## System architecture
