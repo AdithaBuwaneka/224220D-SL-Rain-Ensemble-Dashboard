@@ -42,6 +42,9 @@ Weather data by Open-Meteo.com, licensed under CC BY 4.0.
 
 ## Method
 
+- **Preprocessing:** checked for missing values and duplicate (city, date) rows (there were none), made the 1 mm
+  label, encoded season, zone and city as 0/1 columns, removed the rows with no 7 day history or no next day, and
+  scaled the inputs for the ANN only. Outliers were kept, because very heavy rain days are real.
 - **Features (45):** today's weather, rain over the last few days, changes since yesterday, season (four
   monsoon periods), zone and city. Only data up to today is used for each prediction.
 - **Split by time:** train 2010 to 2021, validation 2022 to 2023, test 2024 to Nov 2026. No shuffling, so no
