@@ -461,7 +461,7 @@ with tab_data:
                       category_orders={"zone": list(ZONE_COLORS)}, height=400,
                       labels={"m": "", "precipitation_sum": "mm in the month", "zone": "Zone"})
         fig.update_traces(hovertemplate="%{x}: %{y:.0f} mm<extra></extra>")
-        for x0, x1, t in [(0.5, 2.5, "NE monsoon"), (4.5, 9.5, "South-west monsoon"), (11.5, 12.5, "")]:
+        for x0, x1, t in [(0.5, 2.5, "NE monsoon"), (4.5, 9.5, "South-west monsoon"), (11.5, 12.5, "NE")]:
             fig.add_vrect(x0=x0, x1=x1, fillcolor="rgba(128,128,128,0.12)", line_width=0,
                           annotation_text=t, annotation_position="top left", annotation_font_size=11)
         fig.update_layout(margin=dict(t=10), legend=dict(orientation="h", y=-0.22),
@@ -469,7 +469,7 @@ with tab_data:
                                      ticktext=["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct",
                                                "Nov", "Dec"]))
         st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
-        st.caption("Shaded: the two monsoons. The wet zone peaks in May and in October to November; the dry zone gets "
+        st.caption("Shaded: the two monsoons (the north-east monsoon runs from December to February). The wet zone peaks in May and in October to November; the dry zone gets "
                    "most of its rain from October to December.")
 
     with st.container(border=True):
