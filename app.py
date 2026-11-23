@@ -611,7 +611,7 @@ with tab_models:
     st.dataframe(reg, use_container_width=True,
                  column_config={c: st.column_config.NumberColumn(format="%.3f") for c in reg.columns})
     st.caption("Average error is how far the predicted amount is from the real amount, in mm (lower is better). "
-               "The RF + ANN hybrid has the lowest error.")
+               "The RF + ANN hybrid has the lowest average error; the ANN alone is very close.")
 
 # ---------------------------------------------------------------- tab 4: test years
 with tab_test:

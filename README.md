@@ -74,7 +74,7 @@ Weather data by Open-Meteo.com, licensed under CC BY 4.0.
 | Soft voting (used in the dashboard) | 0.889 | 0.797 | **0.854** |
 | Hybrid: ARIMA + RF | 0.888 | **0.800** | **0.854** |
 
-Rain amount: Random Forest + ANN gave the lowest error (MAE 4.34 mm, R² 0.33), compared with 5.33 mm for persistence.
+Rain amount: Random Forest + ANN gave the lowest average error (MAE 4.34 mm, R² 0.33), compared with 5.33 mm for persistence.
 
 Main findings:
 
