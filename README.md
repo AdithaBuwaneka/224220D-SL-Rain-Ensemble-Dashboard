@@ -143,7 +143,7 @@ predictions to `data/processed/`, which the dashboard then uses.
 and choose Runtime, Run all. The first code cell downloads this repo (for the data and the `src` folder) and
 installs CatBoost, so nothing has to be uploaded by hand. On the free Colab CPU it takes about 30 minutes. Colab
 uses its own library versions (for example scikit-learn 1.6.1), so a few numbers can differ slightly in the third
-decimal place (the ROC-AUC values and the ranking of the models stay the same).
+decimal place. In my Colab run every ROC-AUC changed by less than 0.001, and CatBoost was still the best model.
 
 **Download the data again (optional):** `python src/download_data.py` gets the same ERA5 data from the Open-Meteo
 Historical Weather API and saves it to `data/raw/`.
