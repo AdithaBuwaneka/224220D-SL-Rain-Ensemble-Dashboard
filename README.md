@@ -6,6 +6,8 @@ predictions with SHAP, and shows everything in a Streamlit dashboard with live w
 
 **Live app: [sl-rain-tomorrow.streamlit.app](https://sl-rain-tomorrow.streamlit.app)**
 
+**Notebook in Google Colab: [open the notebook](https://colab.research.google.com/github/AdithaBuwaneka/224220D-SL-Rain-Ensemble-Dashboard/blob/main/224220D_Wimalasuriya_AGAB_SL_Rain_Ensemble.ipynb)**
+
 CM3720 Machine Learning & Pattern Recognition hands-on project by Wimalasuriya A.G.A.B. (224220D)
 
 ## System architecture
@@ -133,6 +135,10 @@ jupyter notebook 224220D_Wimalasuriya_AGAB_SL_Rain_Ensemble.ipynb
 Then choose Kernel, Restart & Run All (or Run All in VS Code with the Jupyter extension). It takes about 15 minutes
 on a laptop CPU. It reads `data/raw/` and writes the models to `models/`, the charts to `images/` and the test-year
 predictions to `data/processed/`, which the dashboard then uses.
+
+**In Google Colab:** open the [Colab link](https://colab.research.google.com/github/AdithaBuwaneka/224220D-SL-Rain-Ensemble-Dashboard/blob/main/224220D_Wimalasuriya_AGAB_SL_Rain_Ensemble.ipynb)
+and choose Runtime, Run all. The first code cell downloads this repo (for the data and the `src` folder) and
+installs CatBoost, so nothing has to be uploaded by hand. On the free Colab CPU it takes longer than on a laptop.
 
 **Download the data again (optional):** `python src/download_data.py` gets the same ERA5 data from the Open-Meteo
 Historical Weather API and saves it to `data/raw/`.
