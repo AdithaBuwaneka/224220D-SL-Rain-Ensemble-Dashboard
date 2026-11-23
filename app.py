@@ -690,6 +690,11 @@ page uses the Open-Meteo forecast API (last 60 days + today), so its values come
 ARIMA + Random Forest, and a Random Forest + ANN hybrid for the rainfall amount. Full details, results and the
 discussion are in the notebook in the GitHub repository.
 
+**Who can use it:** farmers planning when to spray, harvest or dry paddy in the Yala and Maha seasons, and disaster
+management teams watching for heavy rain (for example on the Kelani river). With the zone cut-offs, when this dashboard
+said rain on the test years it really rained 86% of the time, and it caught 77% of the rain days. It is a study, not
+an official forecast: official weather warnings come from the Department of Meteorology.
+
 **AI-use declaration:** AI tools (Claude) were used to write all of the code and its comments (the notebook, this Streamlit dashboard and
 the scripts that draw the charts and images), and to help with the wording of my written sections (the points and
 decisions in them are my own). The project idea, the choice of data and cities, the planning, the modelling decisions, and the

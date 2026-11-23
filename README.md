@@ -87,6 +87,10 @@ Main findings:
   cut-offs, the intermediate zone missed the most rain days (31%).
 - Choosing the cut-off for each zone raised the wet zone's balanced accuracy from 0.72 to 0.80.
 
+**Who can use it:** farmers planning when to spray, harvest or dry paddy in the Yala and Maha seasons, and disaster
+management teams watching for heavy rain. With the zone cut-offs, when the dashboard said rain on the test years it
+really rained 86% of the time, and it caught 77% of the rain days. It is a study, not an official forecast.
+
 The full discussion is in the notebook.
 
 ## Project structure
