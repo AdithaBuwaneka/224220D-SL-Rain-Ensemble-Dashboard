@@ -354,10 +354,10 @@ with tab_map:
     k = st.columns(3)
     k[0].metric("Cities with rain tomorrow", f"{n_rain} of {len(pred)}", border=True,
                 help=f"Rain = 1 mm or more, decided with each zone's cut-off. Rain expected in: {rain_cities}")
-    k[1].metric(f"Highest chance of rain: {top_city}", f"{pred.loc[top_city, 'Soft voting']:.0%}", border=True,
-                help="Soft voting (Random Forest, XGBoost, LightGBM, CatBoost)")
-    k[2].metric(f"Most rain expected: {wet_city}", f"{pred.loc[wet_city, 'expected_mm']:.1f} mm", border=True,
-                help="Random Forest + ANN hybrid")
+    k[1].metric(f"Highest chance: {top_city}", f"{pred.loc[top_city, 'Soft voting']:.0%}", border=True,
+                help="Highest chance of rain tomorrow. Soft voting (Random Forest, XGBoost, LightGBM, CatBoost)")
+    k[2].metric(f"Most rain: {wet_city}", f"{pred.loc[wet_city, 'expected_mm']:.1f} mm", border=True,
+                help="Most rain expected tomorrow. Random Forest + ANN hybrid")
 
     # 2. the picture: weather map + chance by city
     left, right = st.columns([3, 2])
@@ -426,12 +426,13 @@ with tab_data:
     k[0].metric("Rows (city days)", f"{len(raw):,}", border=True)
     k[1].metric("Cities", raw["city"].nunique(), border=True,
                 help=", ".join(f"{n_zone.get(z, 0)} {z.lower()}" for z in ZONE_COLORS))
-    k[2].metric("Period", f"{raw['date'].min():%Y} to {raw['date'].max():%Y}", border=True,
-                help=f"{raw['date'].min().date()} to {raw['date'].max().date()}")
-    k[3].metric("Days with rain (1 mm or more)", f"{(raw['precipitation_sum'] >= 1).mean():.0%}", border=True)
-    st.caption(f"Data quality: {int(raw.isna().sum().sum())} missing values, "
-               f"{int(raw.duplicated(['city', 'date']).sum())} duplicate city and date rows, and every city has "
-               f"{raw.groupby('city').size().min():,} days.")
+    k[2].metric("Days per city", f"{raw.groupby('city').size().min():,}", border=True,
+                help="Every city has every day, with no gaps")
+    k[3].metric("Rain days", f"{(raw['precipitation_sum'] >= 1).mean():.0%}", border=True,
+                help="Days with 1 mm of rain or more, all cities")
+    st.caption(f"Period: {raw['date'].min():%d %b %Y} to {raw['date'].max():%d %b %Y}. "
+               f"Data quality: {int(raw.isna().sum().sum())} missing values and "
+               f"{int(raw.duplicated(['city', 'date']).sum())} duplicate city and date rows.")
 
     tr = raw[raw["date"] <= "2021-12-31"]            # zones are worked out from the training years only
     annual = (tr.groupby(["city", tr["date"].dt.year])["precipitation_sum"].sum().groupby("city").mean()
@@ -532,8 +533,8 @@ with tab_models:
     tp_pred = tp_all["prob_soft_voting"] >= tp_all["zone"].map(info["zone_threshold"])
     k = st.columns(3)
     k[0].metric("Best ROC-AUC", f"{res['ROC_AUC'].max():.3f}", border=True, help=res["ROC_AUC"].idxmax())
-    k[1].metric("Better than 'tomorrow = today'", f"+{res['ROC_AUC'].max() - res.loc['Baseline: persistence', 'ROC_AUC']:.3f} AUC",
-                border=True, help="Compared to the persistence baseline")
+    k[1].metric("Better than persistence", f"+{res['ROC_AUC'].max() - res.loc['Baseline: persistence', 'ROC_AUC']:.3f} AUC",
+                border=True, help="Compared to the persistence baseline, which says tomorrow will be like today")
     k[2].metric("Correct days (soft voting)", f"{(tp_pred == (tp_all['rain_tomorrow_mm'] >= 1)).mean():.0%}", border=True,
                 help="All 9 cities, 9,441 test days, zone cut-offs")
     res = res.sort_values("ROC_AUC", ascending=False)
