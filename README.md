@@ -26,6 +26,7 @@ CM3720 Machine Learning & Pattern Recognition hands-on project by Wimalasuriya A
   whether the chance of rain can be trusted
 - **Why this prediction?:** SHAP explanation for any city, and the features that matter most in each zone
 - **Test years:** confusion matrix and day-by-day results for each city in 2024 to 2026
+- **About:** the question, the data, the models, who can use it, and the AI-use declaration
 - Sidebar: live or past-day weather and the theme (it can be hidden to widen the charts); the city is picked at the
   top of the SHAP and test-year tabs, and both tabs always show the same city
 - Theme buttons in the sidebar: light (the default), dark, or the computer's own setting, with no page reload
