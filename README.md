@@ -10,7 +10,7 @@ predictions with SHAP, and shows everything in a Streamlit dashboard with live w
 
 **Video (3 minutes): [watch the video](https://drive.google.com/file/d/1j3-_g3aZ0d8X2SRf98wrZCUvI_UScTex/view?usp=sharing)**
 
-CM3720 Machine Learning & Pattern Recognition hands-on project by Wimalasuriya A.G.A.B. (224220D)
+CM4371 Machine Learning & Pattern Recognition hands-on project by Wimalasuriya A.G.A.B. (224220D)
 
 ## System architecture
 

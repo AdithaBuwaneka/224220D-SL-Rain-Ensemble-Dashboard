@@ -221,7 +221,7 @@ with st.sidebar, st.spinner("Loading the models ..."):
 
 # ---------------------------------------------------------------- data for the prediction
 st.sidebar.title("Sri Lanka rain tomorrow")
-st.sidebar.caption("CM3720 hands-on project by Wimalasuriya A.G.A.B. (224220D)")
+st.sidebar.caption("CM4371 hands-on project by Wimalasuriya A.G.A.B. (224220D)")
 st.sidebar.subheader("Controls")
 source = st.sidebar.radio("Weather data", ["Live (Open-Meteo, today)", "Past day (ERA5 data)"],
                           help="Changes the Tomorrow and Why this prediction? tabs.")
@@ -701,6 +701,6 @@ decisions in them are my own). The project idea, the choice of data and cities, 
 plan and Excalidraw-style look of the architecture diagram are my own. I reviewed the code and the results,
 and I take responsibility for the submitted work.
 
-Wimalasuriya A.G.A.B. (224220D), CM3720 Machine Learning & Pattern Recognition
+Wimalasuriya A.G.A.B. (224220D), CM4371 Machine Learning & Pattern Recognition
 """)
     st.caption(f"Models trained until {info['trained_until']}.")
