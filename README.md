@@ -138,7 +138,9 @@ predictions to `data/processed/`, which the dashboard then uses.
 
 **In Google Colab:** open the [Colab link](https://colab.research.google.com/github/AdithaBuwaneka/224220D-SL-Rain-Ensemble-Dashboard/blob/main/224220D_Wimalasuriya_AGAB_SL_Rain_Ensemble.ipynb)
 and choose Runtime, Run all. The first code cell downloads this repo (for the data and the `src` folder) and
-installs CatBoost, so nothing has to be uploaded by hand. On the free Colab CPU it takes longer than on a laptop.
+installs CatBoost, so nothing has to be uploaded by hand. On the free Colab CPU it takes about 30 minutes. Colab
+uses its own library versions (for example scikit-learn 1.6.1), so a few numbers can differ slightly in the third
+decimal place (the ROC-AUC values and the ranking of the models stay the same).
 
 **Download the data again (optional):** `python src/download_data.py` gets the same ERA5 data from the Open-Meteo
 Historical Weather API and saves it to `data/raw/`.
