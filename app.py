@@ -338,8 +338,8 @@ with st.sidebar:
     st.markdown("---")
     st.caption("Data: [Open-Meteo.com](https://open-meteo.com/) (CC BY 4.0), ERA5 by ECMWF / Copernicus.")
 
-tab_map, tab_models, tab_why, tab_test, tab_about = st.tabs(
-    ["Tomorrow", "Model comparison", "Why this prediction?", "Test years (2024 to 2026)", "About"])
+tab_map, tab_data, tab_models, tab_why, tab_test, tab_about = st.tabs(
+    ["Tomorrow", "Data", "Model comparison", "Why this prediction?", "Test years (2024 to 2026)", "About"])
 
 # ---------------------------------------------------------------- tab 1: dashboard
 with tab_map:
@@ -413,6 +413,75 @@ with tab_map:
         fig.update_layout(margin=dict(t=10))
         st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
         st.caption("Chance of rain (%) from each model. Soft voting is the average of the first four.")
+
+# ---------------------------------------------------------------- tab: the data
+with tab_data:
+    st.header("The data")
+    st.caption("Daily ERA5 reanalysis weather from the Open-Meteo Historical Weather API, the data the models were "
+               "trained and tested on. The live page uses Open-Meteo's forecast data instead.")
+    raw = get_era5()
+    zone_of = info["zone"]
+    n_zone = pd.Series(zone_of).value_counts()
+    k = st.columns(4)
+    k[0].metric("Rows (city days)", f"{len(raw):,}", border=True)
+    k[1].metric("Cities", raw["city"].nunique(), border=True,
+                help=", ".join(f"{n_zone.get(z, 0)} {z.lower()}" for z in ZONE_COLORS))
+    k[2].metric("Period", f"{raw['date'].min():%Y} to {raw['date'].max():%Y}", border=True,
+                help=f"{raw['date'].min().date()} to {raw['date'].max().date()}")
+    k[3].metric("Days with rain (1 mm or more)", f"{(raw['precipitation_sum'] >= 1).mean():.0%}", border=True)
+    st.caption(f"Data quality: {int(raw.isna().sum().sum())} missing values, "
+               f"{int(raw.duplicated(['city', 'date']).sum())} duplicate city and date rows, and every city has "
+               f"{raw.groupby('city').size().min():,} days.")
+
+    tr = raw[raw["date"] <= "2021-12-31"]            # zones are worked out from the training years only
+    annual = (tr.groupby(["city", tr["date"].dt.year])["precipitation_sum"].sum().groupby("city").mean()
+              .sort_values(ascending=False))
+    left, right = st.columns(2)
+    with left, st.container(border=True):
+        st.markdown("**Mean yearly rain and the zone of each city (2010 to 2021)**")
+        fig = go.Figure()
+        for z, c in ZONE_COLORS.items():
+            a = annual[[zone_of[x] == z for x in annual.index]]
+            fig.add_trace(go.Bar(x=a.index, y=a.values, name=f"{z} zone", marker_color=c,
+                                 hovertemplate="%{x}: %{y:,.0f} mm a year<extra></extra>"))
+        for y_, t in [(2500, "2,500 mm: wet zone limit"), (1750, "1,750 mm: dry zone limit")]:
+            fig.add_hline(y=y_, line_dash="dot", line_color="#9a9a94", annotation_text=t, annotation_position="top right")
+        fig.update_layout(height=400, margin=dict(t=10), barmode="overlay", yaxis_title="mm a year",
+                          xaxis=dict(categoryorder="array", categoryarray=list(annual.index)),
+                          legend=dict(orientation="h", y=-0.22))
+        st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+        st.caption("Each city's zone comes from its own rain in the training years, so the test years are not used.")
+    with right, st.container(border=True):
+        st.markdown("**Rain in each month, by zone (2010 to 2021)**")
+        mon = (tr.assign(zone=tr["city"].map(zone_of), y=tr["date"].dt.year, m=tr["date"].dt.month)
+                 .groupby(["zone", "city", "y", "m"])["precipitation_sum"].sum()
+                 .groupby(["zone", "m"]).mean().reset_index())
+        fig = px.line(mon, x="m", y="precipitation_sum", color="zone", markers=True, color_discrete_map=ZONE_COLORS,
+                      category_orders={"zone": list(ZONE_COLORS)}, height=400,
+                      labels={"m": "", "precipitation_sum": "mm in the month", "zone": "Zone"})
+        fig.update_traces(hovertemplate="%{x}: %{y:.0f} mm<extra></extra>")
+        for x0, x1, t in [(0.5, 2.5, "NE monsoon"), (4.5, 9.5, "South-west monsoon"), (11.5, 12.5, "")]:
+            fig.add_vrect(x0=x0, x1=x1, fillcolor="rgba(128,128,128,0.12)", line_width=0,
+                          annotation_text=t, annotation_position="top left", annotation_font_size=11)
+        fig.update_layout(margin=dict(t=10), legend=dict(orientation="h", y=-0.22),
+                          xaxis=dict(tickvals=list(range(1, 13)),
+                                     ticktext=["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct",
+                                               "Nov", "Dec"]))
+        st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+        st.caption("Shaded: the two monsoons. The wet zone peaks in May and in October to November; the dry zone gets "
+                   "most of its rain from October to December.")
+
+    with st.container(border=True):
+        st.markdown("**Share of days with rain, by city (all years)**")
+        share = pd.DataFrame({f"{t} mm or more": raw.groupby("city")["precipitation_sum"]
+                             .apply(lambda s, t=t: (s >= t).mean() * 100) for t in (0.1, 1, 5)}).loc[annual.index]
+        share.insert(0, "zone", [zone_of[c] for c in share.index])
+        share.insert(1, "mean yearly rain (mm)", annual.round(0))
+        st.dataframe(share, use_container_width=True,
+                     column_config={"mean yearly rain (mm)": st.column_config.NumberColumn(format="%.0f"),
+                                    **{c: st.column_config.NumberColumn(format="%.0f %%") for c in share.columns[2:]}})
+        st.caption("ERA5 gives a little drizzle (0.1 mm) on most days, so a rain day here means 1 mm or more, the "
+                   "international 'wet day' definition (ETCCDI R1mm). 5 mm or more is real rain.")
 
 # ---------------------------------------------------------------- tab 2: SHAP
 with tab_why:

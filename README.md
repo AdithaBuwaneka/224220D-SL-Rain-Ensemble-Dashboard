@@ -20,6 +20,8 @@ CM3720 Machine Learning & Pattern Recognition hands-on project by Wimalasuriya A
 
 - **Tomorrow:** chance of rain for every city on an OpenStreetMap weather map (press Play to see the last 7 days),
   chance by city with each zone's cut-off, and the expected amount of rain
+- **Data:** size and quality of the ERA5 data, each city's yearly rain and zone, rain in each month by zone (the
+  monsoons), and the share of rain days in every city
 - **Model comparison:** all models on the test years with 95% intervals, by zone and by monsoon season, and
   whether the chance of rain can be trusted
 - **Why this prediction?:** SHAP explanation for any city, and the features that matter most in each zone
